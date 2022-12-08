@@ -1,4 +1,4 @@
-# MAPF_analysis
+# MAPF analysis
 Python-based analitic tools for MAPF problems, which contains a visualizer and a data analyzer.
 ## Plan Visualizer
 ### Arguments
