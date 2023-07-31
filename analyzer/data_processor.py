@@ -641,7 +641,7 @@ class DataProcessor:
         for _map_ in self.config['maps']:
             fig_name += _map_['label'] + '_'
         fig_name += x_index + '_' + y_index + '_plot.png'
-        plt.savefig(fig_name)
+        # plt.savefig(fig_name)
         if x_index == 'ins':
             self.line_width = tmp_lw  # set the line width back
 
@@ -719,7 +719,7 @@ class DataProcessor:
                 plt.legend(loc="best", fontsize=self.text_size)
 
         fig_name = x_index + '_' + use_op + '_plot.png'
-        plt.savefig(fig_name)
+        # plt.savefig(fig_name)
         plt.show()
 
     # def plot_hist_fig(self, x_index:str='num', y_index:List[str]=['num_ex_conf', 'num_in_conf']):
