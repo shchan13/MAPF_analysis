@@ -61,7 +61,7 @@ def get_file_name(map_name:str, scen:str, ag_num:int, solver_name: str) -> str:
     return out_name
 
 
-def get_csv_instance(exp_path:str, map_name:str, scen:str, ag_num:int, 
+def get_csv_instance(exp_path:str, map_name:str, scen:str, ag_num:int,
                      solver_name:str, solver_dir_name:str=None):
     """Get the path and read the csv with pandas
 
@@ -74,6 +74,8 @@ def get_csv_instance(exp_path:str, map_name:str, scen:str, ag_num:int,
     Returns:
         pd.DataFrame: the csv file
     """
+    if solver_name == 'LB':
+        solver_name = 'LACAMLNS'
     if solver_dir_name is None:
         solver_dir_name = solver_name
     return read_file(os.path.join(
@@ -134,16 +136,18 @@ def process_val(raw_value, raw_index:str, solution_cost:int,
                 solver_name:str, succ_only:bool=False):
     is_anytime = solver_name in ANYTIME_SOLVERS
     is_succ = solution_cost >= 0 and (runtime <= time_limit or is_anytime)
+
     if raw_index  == 'succ':
         return int(is_succ)
 
     if raw_index in ['runtime', 'runtime of initial solution']:
         return min(raw_value, time_limit)
 
-    if raw_index in ['num_total_conf', 'num_0child']:
-        if raw_value == 0:
-            return np.inf
-        return raw_value
+    if raw_index in ['num_total_conf', 'num_0child'] and raw_value == 0:
+        return np.inf
+
+    if raw_index == 'solution cost' and raw_value < 0:
+        return np.inf
 
     if succ_only and not is_succ:
         return np.inf

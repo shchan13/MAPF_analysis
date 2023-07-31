@@ -108,9 +108,13 @@ class DataProcessor:
                         data_frame = util.get_csv_instance(self.config['exp_path'], _map_['name'],
                                                            scen, ag_num, solver['name'])
                         for _, row in data_frame.iterrows():
+                            succ_only = self.config['succ_only']
+                            if solver['name'] == 'LB':  # This is for Sum of lowerbounds
+                                in_index = 'sum of distance'
+                                succ_only = False
                             _val_ = util.process_val(row[in_index], in_index, row['solution cost'],
                                                      row['runtime'], self.config['time_limit'],
-                                                     solver['name'], self.config['succ_only'])
+                                                     solver['name'], succ_only)
 
                             result[solver['name']][_map_['name']]['val'].append(_val_)
                             result[solver['name']][_map_['name']]['x'].append(global_idx)
@@ -784,14 +788,14 @@ if __name__ == '__main__':
 
     # data_processor.plot_fig(x_index='num', y_index='succ')
     # data_processor.plot_fig(x_index='num', y_index='runtime')
-    data_processor.plot_fig(x_index='num', y_index='#low-level search calls')
+    # data_processor.plot_fig(x_index='num', y_index='#low-level search calls')
     # data_processor.plot_fig(x_index='num', y_index='#low-level expanded')
     # data_processor.plot_fig(x_index='num', y_index='#high-level expanded')
     # data_processor.plot_fig(x_index='num', y_index='#restarts')
     # data_processor.plot_fig(x_index='num', y_index='#backtrack')
     # data_processor.plot_fig(x_index='num', y_index='#pathfinding')
 
-    # data_processor.plot_fig(x_index='ins', y_index='solution cost')
+    data_processor.plot_fig(x_index='ins', y_index='solution cost')
     # data_processor.plot_fig(x_index='ins', y_index='#high-level generated')
     # data_processor.plot_fig(x_index='ins', y_index='#low-level expanded')
     # data_processor.plot_fig(x_index='ins', y_index='#backtrack')
