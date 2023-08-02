@@ -88,9 +88,9 @@ class InstanceGenerator:
             print('start ', (srow, scol), 'and goal', goal_loc, 'with walk steps ', walk_step)
             k += 1
 
-        cur_ins = Instance()
-        cur_ins.generate_agents(start_locs, goal_locs)
-        return cur_ins
+        ins = Instance()
+        ins.generate_agents(start_locs, goal_locs)
+        return ins
 
 
     def cross_over(self):
@@ -111,7 +111,7 @@ class InstanceGenerator:
     def mutation(self):
         """Randomly pick an instance and mutate
         """
-        ins_idx = random.randint(0, self.num_of_ins-1)
+        idx = random.randint(0, self.num_of_ins-1)
         num_new_agents = random.randint(1, max(1, self.num_of_agents//10))
         new_agents = np.random.choice(np.arange(self.num_of_agents), size = num_new_agents)
 
@@ -120,20 +120,20 @@ class InstanceGenerator:
 
             for k in range(num_new_agents):
                 is_overlap = False
-                for agent in self.instances[ins_idx]:
+                for agent in self.instances[idx]:
                     if agent.start_loc == tmp_ins.agents[k].start_loc or\
                         agent.goal_loc == tmp_ins.agents[k].goal_loc:
                         is_overlap = True
                         break
                 if not is_overlap:
-                    self.instances[ins_idx].agents[new_agents[k]] = tmp_ins.agents[k]
+                    self.instances[idx].agents[new_agents[k]] = tmp_ins.agents[k]
 
         else:  # Swap the start and goal locations
             for new_ag in new_agents:
-                tmp_loc:Tuple[int,int] = self.instances[ins_idx].agents[new_ag].start_loc
-                self.instances[ins_idx].agents[new_ag].start_loc =\
-                    self.instances[ins_idx].agents[new_ag].goal_loc
-                self.instances[ins_idx].agents[new_ag].goal_loc = tmp_loc
+                tmp_loc:Tuple[int,int] = self.instances[idx].agents[new_ag].start_loc
+                self.instances[idx].agents[new_ag].start_loc =\
+                    self.instances[idx].agents[new_ag].goal_loc
+                self.instances[idx].agents[new_ag].goal_loc = tmp_loc
 
 
     def genetic_algorithm(self):
