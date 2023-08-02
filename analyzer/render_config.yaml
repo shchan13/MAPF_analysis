@@ -1,7 +1,6 @@
-map_file: "/home/rdaneel/mapf_benchmark/mapf-map/maze-32-32-2.map"
-scen_file: "/home/rdaneel/mapf_benchmark/scen-random/maze-32-32-2-random-21.scen"
-path_file: "/home/rdaneel/PBS/result_path.txt"
-num_of_agents: 200
+map_file: "/home/rdaneel/mapf_benchmark/mapf-map/random-32-32-20.map"
+scen_file: "/home/rdaneel/MAPF_analysis/local/scen-dense/random-32-32-20-dense-1.scen"
+num_of_agents: 10
 pixel_per_move: 5
 moves: 5
 plot_ag_num: true

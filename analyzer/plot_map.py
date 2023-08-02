@@ -11,9 +11,9 @@ from tkinter import Tk, Canvas, Label, mainloop
 import time
 import yaml
 
-COLORS: List[str] = ["deepskyblue", "royalblue", "orange", "peru", "pink",
-                     "yellow", "green", "violet", "tomato", "yellowgreen",
-                     "cyan", "brown", "olive", "gray", "crimson"]
+COLORS: List[str] = ['deepskyblue', 'royalblue', 'orange', 'peru', 'pink',
+                     'yellow', 'green', 'violet', 'tomato', 'yellowgreen',
+                     'cyan', 'brown', 'olive', 'gray', 'crimson']
 
 class Action(Enum):
     """Actions for each agent
@@ -31,77 +31,78 @@ class MAPFRenderer:
     """Render MAPF instance
     """
     def __init__(self, in_config) -> None:
-        self.config: Dict = dict()
+        self.config: Dict = {}
         config_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), in_config)
-        with open(config_dir, 'r') as fin:
+        with open(config_dir, mode='r', encoding='utf-8') as fin:
             self.config = yaml.load(fin, Loader=yaml.FullLoader)
 
         self.width: int = -1
         self.height: int = -1
-        self.env_map: List[List[bool]] = list()
+        self.env_map: List[List[bool]] = []
 
-        self.num_of_agents: int = self.config["num_of_agents"]
-        self.agents: List = list()
-        self.agent_texts: List = list()
-        self.start_loc: Dict[int,Tuple[int, int]] = dict()
-        self.goal_loc: Dict[int,Tuple[int,int]] = dict()
-        self.paths: Dict[int,List[Tuple[int,int]]] = dict()
-        self.cur_loc: Dict[int,Tuple[int,int]] = dict()
+        self.num_of_agents: int = self.config['num_of_agents']
+        self.agents: List = []
+        self.agent_texts: List = []
+        self.start_loc: Dict[int,Tuple[int, int]] = {}
+        self.goal_loc: Dict[int,Tuple[int,int]] = {}
+        self.paths: Dict[int,List[Tuple[int,int]]] = {}
+        self.cur_loc: Dict[int,Tuple[int,int]] = {}
         self.cur_timestep: int = 0
         self.makespan = -1
-        self.tile_size = self.config["pixel_per_move"] * self.config["moves"]
+        self.tile_size = self.config['pixel_per_move'] * self.config['moves']
 
         self.load_map()
-        self.load_paths()
+        # self.load_paths()
         self.load_agents()
 
         self.window = Tk()
         wd_width = str(self.width * self.tile_size + 10)
         wd_height = str(self.height * self.tile_size + 60)
-        self.window.geometry(wd_width + "x" + wd_height)
-        self.window.title("MAPF Instance")
+        self.window.geometry(wd_width + 'x' + wd_height)
+        self.window.title('MAPF Instance')
 
         self.timestep_label = Label(self.window,
-                              text = f"Timestep: {self.cur_timestep:03d}",
-                              font=("Arial", int(self.tile_size)))
-        self.timestep_label.pack(side="top", anchor="ne")
+                              text = f'Timestep: {self.cur_timestep:03d}',
+                              font=('Arial', int(self.tile_size)))
+        self.timestep_label.pack(side='top', anchor='ne')
 
         self.canvas = Canvas(width=self.width * self.tile_size,
                              height=self.height * self.tile_size,
-                             bg="white")
-        self.canvas.pack(side="bottom", pady=5)
+                             bg='white')
+        self.canvas.pack(side='bottom', pady=5)
         self.render_env()
-        self.render_static_positions(self.goal_loc)
+        self.render_static_positions(loc=self.start_loc, color_idx=0, shape='oval')
+        self.render_static_positions(loc=self.goal_loc, color_idx=2, shape='oval')
         # self.render_positions()
         self.canvas.update()
-        time.sleep(self.config["delay"]*4)
+        time.sleep(self.config['delay']*4)
 
 
-    def render_static_positions(self, loc: List=None) -> None:
+    def render_static_positions(self, loc:List=None, color_idx:int=2, shape:str='rec') -> None:
         if loc is None:
             loc = self.cur_loc
         for _ag_ in range(self.num_of_agents):
-            color_idx = 2  if _ag_ < 150 else 3
-            self.canvas.create_rectangle(loc[_ag_][0] * self.tile_size,
-                                         loc[_ag_][1] * self.tile_size,
-                                         (loc[_ag_][0]+1) * self.tile_size,
-                                         (loc[_ag_][1]+1) * self.tile_size,
-                                         fill=COLORS[color_idx],
-                                         outline="")
+            if shape == 'rec':
+                self.canvas.create_rectangle(loc[_ag_][0] * self.tile_size,
+                                             loc[_ag_][1] * self.tile_size,
+                                             (loc[_ag_][0]+1) * self.tile_size,
+                                             (loc[_ag_][1]+1) * self.tile_size,
+                                             fill=COLORS[color_idx],
+                                             outline='')
+            elif shape == 'oval':
+                self.canvas.create_oval(loc[_ag_][0] * self.tile_size,
+                                        loc[_ag_][1] * self.tile_size,
+                                        (loc[_ag_][0]+1) * self.tile_size,
+                                        (loc[_ag_][1]+1) * self.tile_size,
+                                        fill=COLORS[color_idx],
+                                        outline='')
 
-            # self.canvas.create_oval(loc[_ag_][0] * self.tile_size,
-            #                         loc[_ag_][1] * self.tile_size,
-            #                         (loc[_ag_][0]+1) * self.tile_size,
-            #                         (loc[_ag_][1]+1) * self.tile_size,
-            #                         fill="white",
-            #                         outline="")
-
-            if self.config["plot_ag_num"]:
+            if self.config['plot_ag_num']:
                 self.canvas.create_text((loc[_ag_][0]+0.5)*self.tile_size,
                                         (loc[_ag_][1]+0.5)*self.tile_size,
                                         text=str(_ag_+1),
-                                        fill="black",
-                                        font=("Arial", int(self.tile_size*0.5)))
+                                        fill='black',
+                                        font=('Arial', int(self.tile_size*0.5)))
 
 
     def render_env(self):
@@ -112,7 +113,7 @@ class MAPFRenderer:
                                                  rid * self.tile_size,
                                                  (cid+1)*self.tile_size,
                                                  (rid+1)*self.tile_size,
-                                                 fill="black")
+                                                 fill='black')
 
 
     def render_positions(self, loc: List = None) -> None:
@@ -126,29 +127,29 @@ class MAPFRenderer:
                                             (loc[_ag_][0]+1) * self.tile_size,
                                             (loc[_ag_][1]+1) * self.tile_size,
                                             fill=COLORS[color_idx],
-                                            outline="")
+                                            outline='')
             self.agents.append(agent)
 
-            if self.config["plot_ag_num"]:
+            if self.config['plot_ag_num']:
                 ag_idx = self.canvas.create_text((loc[_ag_][0]+0.5)*self.tile_size,
                                                  (loc[_ag_][1]+0.5)*self.tile_size,
                                                  text=str(_ag_+1),
-                                                 fill="black",
-                                                 font=("Arial", int(self.tile_size*0.6)))
+                                                 fill='black',
+                                                 font=('Arial', int(self.tile_size*0.6)))
                 self.agent_texts.append(ag_idx)
 
 
     def load_map(self, map_file:str = None) -> None:
         if map_file is None:
-            map_file = self.config["map_file"]
+            map_file = self.config['map_file']
 
-        with open(map_file, "r") as fin:
+        with open(map_file, mode='r', encoding='utf-8') as fin:
             fin.readline()  # ignore type
             self.height = int(fin.readline().strip().split(' ')[1])
             self.width  = int(fin.readline().strip().split(' ')[1])
             fin.readline()  # ingmore 'map' line
             for line in fin.readlines():
-                out_line: List[bool] = list()
+                out_line: List[bool] = []
                 for word in list(line.strip()):
                     if word == '.':
                         out_line.append(True)
@@ -161,9 +162,9 @@ class MAPFRenderer:
 
     def load_agents(self, scen_file:str = None) -> None:
         if scen_file is None:
-            scen_file = self.config["scen_file"]
+            scen_file = self.config['scen_file']
 
-        with open(scen_file, "r") as fin:
+        with open(scen_file, mode='r', encoding='utf-8') as fin:
             fin.readline()  # ignore the first line 'version 1'
             ag_counter:int = 0
             for line in fin.readlines():
@@ -179,21 +180,21 @@ class MAPFRenderer:
 
     def load_paths(self, path_file:str = None) -> None:
         if path_file is None:
-            path_file = self.config["path_file"]
+            path_file = self.config['path_file']
         if not os.path.exists(path_file):
-            logging.warning("No path file is found!")
+            logging.warning('No path file is found!')
             return
 
-        with open(path_file, "r") as fin:
+        with open(path_file, mode='r', encoding='utf-8') as fin:
             ag_counter = 0
             for line in fin.readlines():
-                ag_idx = int(line.split(" ")[1].split(":")[0])
-                self.paths[ag_idx] = list()
-                for cur_loc in line.split(" ")[-1].split("->"):
-                    if cur_loc == "\n":
+                ag_idx = int(line.split(' ')[1].split(':')[0])
+                self.paths[ag_idx] = []
+                for cur_loc in line.split(' ')[-1].split('->'):
+                    if cur_loc == '\n':
                         continue
-                    cur_x = int(cur_loc.split(",")[1].split(")")[0])
-                    cur_y = int(cur_loc.split(",")[0].split("(")[1])
+                    cur_x = int(cur_loc.split(',')[1].split(')')[0])
+                    cur_y = int(cur_loc.split(',')[0].split('(')[1])
                     self.paths[ag_idx].append((cur_x, cur_y))
                 ag_counter += 1
             self.num_of_agents = ag_counter
@@ -208,34 +209,34 @@ class MAPFRenderer:
         """
 
         while self.cur_timestep < self.makespan:
-            self.timestep_label.config(text = f"Timestep: {self.cur_timestep:03d}")
+            self.timestep_label.config(text = f'Timestep: {self.cur_timestep:03d}')
 
-            for _ in range(self.config["moves"]):
+            for _ in range(self.config['moves']):
                 for ag_idx, agent in enumerate(self.agents):
                     next_timestep = min(self.cur_timestep+1, len(self.paths[ag_idx])-1)
                     direction = (self.paths[ag_idx][next_timestep][0] - self.cur_loc[ag_idx][0],
                                  self.paths[ag_idx][next_timestep][1] - self.cur_loc[ag_idx][1])
-                    delta_per_move = (direction[0] * (self.tile_size // self.config["moves"]),
-                                      direction[1] * (self.tile_size // self.config["moves"]))
+                    delta_per_move = (direction[0] * (self.tile_size // self.config['moves']),
+                                      direction[1] * (self.tile_size // self.config['moves']))
                     self.canvas.move(agent, delta_per_move[0], delta_per_move[1])
                     self.canvas.move(self.agent_texts[ag_idx], delta_per_move[0], delta_per_move[1])
 
                 self.canvas.update()
-                time.sleep(self.config["delay"])
+                time.sleep(self.config['delay'])
 
             for ag_idx in range(self.num_of_agents):
                 next_timestep = min(self.cur_timestep+1, len(self.paths[ag_idx])-1)
                 self.cur_loc[ag_idx] = (self.paths[ag_idx][next_timestep][0],
                                         self.paths[ag_idx][next_timestep][1])
             self.cur_timestep += 1
-            time.sleep(self.config["delay"] * 2)
+            time.sleep(self.config['delay'] * 2)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Take config.yaml as input!')
     parser.add_argument('--config', type=str, default='config.yaml')
     args = parser.parse_args()
 
     mapf_renderer = MAPFRenderer(args.config)
-    mapf_renderer.move_agents()
+    # mapf_renderer.move_agents()
     mainloop()

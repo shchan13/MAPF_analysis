@@ -5,10 +5,10 @@
 import logging
 import os
 import sys
-from typing import List
+import random
+from typing import List, Tuple
 import pandas as pd
 import numpy as np
-
 
 LARGE_MAPS = ['den520d','warehouse-10-20-10-2-1','warehouse-20-40-10-2-1','warehouse-20-40-10-2-2']
 ANYTIME_SOLVERS = ['LACAMLNS', 'AnytimeCBS']
@@ -85,7 +85,7 @@ def get_csv_instance(exp_path:str, map_name:str, scen:str, ag_num:int,
 
 def create_csv_file(exp_path:str, map_name:str, scen:str, ag_num:int, ins_num:int, sol_dir:str,
                     sol_names:List[str], mode:str='min', objective:str='runtime'):
-    csv_files = dict()
+    csv_files = {}
     for idx, _name_ in enumerate(sol_names):
         csv_files[_name_] = get_csv_instance(exp_path, map_name, scen, ag_num, _name_, sol_dir)
         if idx == 0:
@@ -154,3 +154,63 @@ def process_val(raw_value, raw_index:str, solution_cost:int,
 
     assert raw_value >= 0
     return raw_value
+
+def load_map(map_file:str):
+    """load map from the map_file
+        Args:
+            map_file (str): file of the map
+    """
+    height = -1
+    width = -1
+    out_map = []
+    with open(map_file, mode="r", encoding="UTF-8") as fin:
+        fin.readline()  # Skip the first line
+        height = int(fin.readline().strip("\n").split(" ")[-1])
+        width  = int(fin.readline().strip("\n").split(" ")[-1])
+        fin.readline()  # Skip the line "map"
+        for line in fin.readlines():
+            line = list(line.strip("\n"))
+            out_line = [_char_ == "." for _char_ in line]
+            out_map.append(out_line)
+
+    return height, width, out_map
+
+
+def get_map_name(map_file:str):
+    """Get the map name from the map_file
+
+    Args:
+        map_file (str): the path to the map
+    """
+    return map_file.split('/')[-1].split('.')[0]
+
+
+def random_walk(in_map:List[List[bool]], init_loc:Tuple, steps:int):
+    """Random walk from the init_loc on in_map with steps
+
+    Args:
+        in_map (List[List[bool]]): map
+        init_loc (Tuple): initial location of the agent
+        steps (int): number of steps to move
+    """
+    if in_map[init_loc[0]][init_loc[1]] is False:
+        logging.error("location (%d,%d) should be a free space!", init_loc[0], init_loc[1])
+        sys.exit()
+
+    curr_loc = init_loc
+    height = len(in_map)
+    width = len(in_map[0])
+    for _ in range(steps):
+        next_locs = [(curr_loc[0]+1, curr_loc[1]),
+                     (curr_loc[0]-1, curr_loc[1]),
+                     (curr_loc[0], curr_loc[1]+1),
+                     (curr_loc[0], curr_loc[1]-1)]
+        random.shuffle(next_locs)
+
+        for next_loc in next_locs:
+            if  -1 < next_loc[0] < height and\
+                -1 < next_loc[1] < width and\
+                in_map[next_loc[0]][next_loc[1]] is True:
+                curr_loc = next_loc
+                break
+    return curr_loc

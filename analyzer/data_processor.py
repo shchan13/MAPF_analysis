@@ -9,8 +9,8 @@ import argparse
 from typing import Dict, List, Tuple
 import yaml
 import matplotlib.pyplot as plt
-import util
 import numpy as np
+import util
 
 
 class DataProcessor:
@@ -58,6 +58,7 @@ class DataProcessor:
         self.x_labels:Dict[str,str] = {'num': 'Number of agents',
                                        'ins': 'MAPF Instance'}
 
+
     def get_subfig_pos(self, f_idx: int):
         """Transfer subplot index to 2-D position
         Args:
@@ -85,6 +86,7 @@ class DataProcessor:
             return self.get_ins_val(y_index)
         elif x_index == 'num':
             return self.get_num_val(y_index, is_avg)
+
 
     def get_ins_val(self, in_index:str='runtime'):
         """Compute the success rate versus the numbers of agents
@@ -249,13 +251,6 @@ class DataProcessor:
         right_bd = self.config['set_shift']
         plt_rng = (right_bd - left_bd) / len(self.config['solvers'])
         _num_ = range(1, len(_x_)+1)
-
-        # Plot the lower bound
-
-
-
-
-
 
         for s_idx, solver in enumerate(self.config['solvers']):
             mf_color = 'white'
@@ -424,6 +419,7 @@ class DataProcessor:
         in_axs.axes.set_yticklabels(y_list, fontsize=self.text_size)
         in_axs.set_ylabel(self.y_labels[y_index], fontsize=self.text_size)
 
+
     def subplot_fig2(self, x_index, y_index, in_axs, in_result):
         _x_ = in_result[self.config['solvers'][0]['name']]['x']
         _num_ = range(1, len(_x_)+1)
@@ -479,6 +475,7 @@ class DataProcessor:
                 output[solver['name']][_map_['name']] = tmp_avg
         print (yaml.dump(output, allow_unicode=True, default_flow_style=False))
 
+
     def get_avg_vals_all(self, y_index='succ'):
         results = self.get_ins_val(y_index)
         output = {}
@@ -494,99 +491,6 @@ class DataProcessor:
             output[solver['name']] = tmp_avg
         print (yaml.dump(output, allow_unicode=True, default_flow_style=False))
 
-
-    # def subplot_hist_fig(self, x_index, y_indices, in_axs, in_map_idx, in_map, in_results):
-    #     _x_ = in_results[0][self.config['solvers'][0]['name']][in_map['name']]['x']
-    #     _num_ = range(1, len(_x_)+1)
-
-    #     for solver in self.config['solvers']:
-    #         _val_ = in_result[solver['name']][in_map['name']]['val']
-    #         _ci_  = in_result[solver['name']][in_map['name']]['ci']
-
-    #         if in_map_idx == 0:
-    #             in_axs.plot(_num_, _val_,
-    #                         label=solver['label'],
-    #                         linewidth=self.line_width,
-    #                         markerfacecolor='white',
-    #                         markeredgewidth=self.mark_width,
-    #                         ms=self.marker_size,
-    #                         color=solver['color'],
-    #                         marker=solver['marker'])
-    #         else:
-    #             in_axs.plot(_num_, _val_,
-    #                         linewidth=self.line_width,
-    #                         markerfacecolor='white',
-    #                         markeredgewidth=self.mark_width,
-    #                         ms=self.marker_size,
-    #                         color=solver['color'],
-    #                         marker=solver['marker'])
-
-    #         # Plot confident interval
-    #         if self.config['plot_ci'] and len(_ci_) > 0:
-    #             _lb_ = [_val_[i] - _ci_[i] for i in range(len(_val_))]
-    #             _ub_ = [_val_[i] + _ci_[i] for i in range(len(_val_))]
-    #             in_axs.fill_between(_num_, _lb_, _ub_, color=solver['color'], alpha=0.2)
-
-    #     in_axs.set_title(in_map['label'], fontsize=self.text_size)
-
-    #     if len(_num_) > self.max_x_num and x_index == "ins":  # This is for instance analysis
-    #         _num_ = list(range(len(_x_)//self.max_x_num, len(_x_)+1, len(_x_)//self.max_x_num))
-    #         _num_.insert(0, 1)
-    #         _x_ = _num_
-
-    #     in_axs.axes.set_xticks(_num_)
-    #     in_axs.axes.set_xticklabels(_x_, fontsize=self.text_size)
-    #     in_axs.set_xlabel(self.x_labels[x_index], fontsize=self.text_size)
-
-    #     y_list = in_axs.axes.get_yticks()
-    #     if y_index == 'succ':
-    #         y_list = [0, 0.2, 0.4, 0.6, 0.8, 1.0]
-    #         in_axs.axes.set_yticks(y_list)
-    #     elif y_index == 'runtime':
-    #         y_list = range(0, 61, 10)
-    #         # y_list = range(0, 32, 5)
-    #         # y_list = range(0, 26, 5)
-    #         # y_list = range(0, 11, 2)
-    #         # y_list = range(0, 2, 1)
-    #         # y_list = [0, 0.5, 1.0, 1.5, 2.0]
-    #         in_axs.axes.set_yticks(y_list)
-    #     elif y_index == '#findPathForSingleAgent':
-    #         in_axs.axes.set_yticks(y_list)
-    #     elif y_index == '#low-level generated':
-    #         label_scale = 1000000
-    #         scale = label_scale * 0.1
-    #         y_list = np.arange(0, max(y_list)+5, scale)
-    #         # y_list = np.arange(0, max(y_list)+5, scale)
-    #         # y_list = np.delete(y_list, 0)
-    #         # y_list = np.delete(y_list, 0)
-    #         # y_list = np.delete(y_list, -1)
-    #         # y_list = np.delete(y_list, -1)
-    #         in_axs.axes.set_yticks(y_list)
-    #         y_list = [str(y/label_scale) for y in y_list]
-    #         # y_list = [str(int(y//label_scale)) for y in y_list]
-    #     elif y_index == '#high-level generated':
-    #         label_scale = 1000
-    #         scale = label_scale * 0.2
-    #         y_list = np.arange(0, max(y_list)+5, scale)
-
-    #         in_axs.axes.set_yticks(y_list)
-    #         # y_list = [str(int(y)) for y in y_list]
-    #         y_list = [str(y/label_scale) for y in y_list]
-    #         # y_list = [str(int(y//label_scale)) for y in y_list]
-    #     else:
-    #         if y_index == 'div':
-    #             y_list = [0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2]
-    #             in_axs.axes.set_yticks(y_list)
-    #         else:
-    #             label_scale = 1000
-    #             scale = label_scale * 1
-    #             y_list = np.arange(0, max(y_list)+5, scale)
-    #             in_axs.axes.set_yticks(y_list)
-    #             y_list = [str(int(y//label_scale)) for y in y_list]        
-
-    #     in_axs.yaxis.grid()
-    #     in_axs.axes.set_yticklabels(y_list, fontsize=self.text_size)
-    #     in_axs.set_ylabel(self.y_labels[y_index], fontsize=self.text_size)
 
     def plot_fig(self, x_index:str='num', y_index:str='succ'):
         tmp_lw = self.line_width
@@ -637,10 +541,10 @@ class DataProcessor:
             else:
                 plt.legend(loc="lower left", fontsize=self.text_size)
 
-        fig_name = ''  # Set the figure name
-        for _map_ in self.config['maps']:
-            fig_name += _map_['label'] + '_'
-        fig_name += x_index + '_' + y_index + '_plot.png'
+        # fig_name = ''  # Set the figure name
+        # for _map_ in self.config['maps']:
+        #     fig_name += _map_['label'] + '_'
+        # fig_name += x_index + '_' + y_index + '_plot.png'
         # plt.savefig(fig_name)
         if x_index == 'ins':
             self.line_width = tmp_lw  # set the line width back
@@ -718,7 +622,7 @@ class DataProcessor:
             else:
                 plt.legend(loc="best", fontsize=self.text_size)
 
-        fig_name = x_index + '_' + use_op + '_plot.png'
+        # fig_name = x_index + '_' + use_op + '_plot.png'
         # plt.savefig(fig_name)
         plt.show()
 
