@@ -6,7 +6,6 @@ import os
 import argparse
 from typing import List, Tuple
 import random
-import scipy.stats as ss
 import numpy as np
 import util
 
