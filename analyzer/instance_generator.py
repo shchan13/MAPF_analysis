@@ -149,7 +149,7 @@ class InstanceGenerator:
                 self.mutation()
 
 
-    def write_instsances(self, out_directory:str='../local/', label='tmp'):
+    def write_all_instsances(self, out_directory:str='../local/', label='tmp'):
         """Write the instance to out_directory
 
         Args:
@@ -176,6 +176,24 @@ class InstanceGenerator:
         print('Done!')
 
 
+    def write_instance(self, instance:Instance, out_directory:str='../local/', label='tmp'):
+        if not os.path.exists(out_directory):
+            os.makedirs(out_directory)
+        print('Write the current instance to files...', end='\t')
+        file_name = self.map_name + '-' + label + '.scen'
+        write_to = os.path.join(out_directory, file_name)  # Generate path to write
+        with open(write_to, mode='w', encoding='utf-8') as fout:
+            fout.write('version 1\n')
+            for ag_idx, agent in enumerate(instance.agents):
+                write_line  = str(ag_idx) + '\t' + self.map_file + '\t'
+                write_line += str(self.width) + '\t' + str(self.height) + '\t'
+                write_line += str(agent.start_loc[1]) + '\t' + str(agent.start_loc[0]) + '\t'
+                write_line += str(agent.goal_loc[1])  + '\t' + str(agent.goal_loc[0])  + '\t'
+                write_line += str(0) + '\n'
+                fout.write(write_line)
+        print('Done!')
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Arguments for instacne generator')
     parser.add_argument('--mapFile',  type=str, default='./example/random-32-32-20.map')
@@ -183,8 +201,11 @@ if __name__ == '__main__':
     parser.add_argument('--insNum',  type=int, default=1)
     parser.add_argument('--outDir',  type=str, default='../local')
     parser.add_argument('--label',  type=str, default='tmp')
+    parser.add_argument('--startID',  type=int, default=1)
     args = parser.parse_args()
 
+    scen_dir = args.outDir+'/scen-'+args.label
     ins_gen = InstanceGenerator(args.mapFile, args.agentNum, args.insNum)
-    ins_gen.generate_default_instances()
-    ins_gen.write_instsances(out_directory=args.outDir, label=args.label)
+    for ins_idx in range(args.insNum):
+        ins = ins_gen.generate_instance(args.agentNum)
+        ins_gen.write_instance(ins, scen_dir, args.label+'-'+str(args.startID+ins_idx))
