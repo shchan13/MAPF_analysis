@@ -163,6 +163,7 @@ def load_map(map_file:str):
     height = -1
     width = -1
     out_map = []
+    num_freespace = 0
     with open(map_file, mode="r", encoding="UTF-8") as fin:
         fin.readline()  # Skip the first line
         height = int(fin.readline().strip("\n").split(" ")[-1])
@@ -172,8 +173,9 @@ def load_map(map_file:str):
             line = list(line.strip("\n"))
             out_line = [_char_ == "." for _char_ in line]
             out_map.append(out_line)
+            num_freespace += sum(bool(x) for x in out_line)
 
-    return height, width, out_map
+    return height, width, out_map, num_freespace
 
 
 def get_map_name(map_file:str):

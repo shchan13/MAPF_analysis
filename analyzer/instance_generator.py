@@ -3,6 +3,7 @@
 # Instance generator for one-shot MAPF
 
 import os
+import sys
 import argparse
 from typing import List, Tuple
 import random
@@ -39,10 +40,14 @@ class InstanceGenerator:
 
     def __init__(self, map_file:str, num_agents:int, num_ins:int):
         # Initialize the parameters
+        self.height, self.width, self.map, self.num_freespace = util.load_map(map_file)
+        if num_agents > self.num_freespace:
+            print('ERROR: number of agents should be at most the number of free spaces!')
+            sys.exit()
+
         self.map_file = map_file
         self.num_of_agents = num_agents
         self.num_of_ins = num_ins
-        self.height, self.width, self.map = util.load_map(map_file)
         self.map_name = util.get_map_name(map_file)
         self.instances:List[Instance] = []
 
