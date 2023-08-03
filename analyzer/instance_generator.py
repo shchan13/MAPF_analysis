@@ -56,7 +56,7 @@ class InstanceGenerator:
         """ Generate all instances by default
         """
         for idx in range(self.num_of_ins):
-            print('Generate instance '+ str(idx) + '... ',)
+            print('Generate instance '+ str(idx) + '... ')
             self.instances.append(self.generate_instance())
 
 
@@ -207,5 +207,6 @@ if __name__ == '__main__':
     scen_dir = args.outDir+'/scen-'+args.label
     ins_gen = InstanceGenerator(args.mapFile, args.agentNum, args.insNum)
     for ins_idx in range(args.insNum):
+        print('Generate instance '+ str(ins_idx) + '... ')
         cur_ins = ins_gen.generate_instance(args.agentNum)
         ins_gen.write_instance(cur_ins, scen_dir, args.label+'-'+str(args.startID+ins_idx))
