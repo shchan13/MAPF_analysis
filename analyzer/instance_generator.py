@@ -10,7 +10,7 @@ import random
 import numpy as np
 import util
 
-RANDOM_WALK_STEPS = 100000
+RANDOM_WALK_WEIGHT = 2
 GA_NUM_ITERATION  = 10000
 MUTATION_PROB = 0.01
 
@@ -50,6 +50,7 @@ class InstanceGenerator:
         self.num_of_ins = num_ins
         self.map_name = util.get_map_name(map_file)
         self.instances:List[Instance] = []
+        self.num_of_steps:int = self.num_freespace * RANDOM_WALK_WEIGHT
 
 
     def generate_default_instances(self):
@@ -78,10 +79,10 @@ class InstanceGenerator:
             start_locs.append((srow, scol))
 
             # Generate goal location with random walk
-            walk_step = guissian_sampling(RANDOM_WALK_STEPS, RANDOM_WALK_STEPS//4)
+            walk_step = guissian_sampling(self.num_of_steps, self.num_of_steps//4)
             goal_loc = util.random_walk(self.map, (srow, scol), walk_step)
             while goal_loc in goal_locs:
-                walk_step = guissian_sampling(RANDOM_WALK_STEPS, RANDOM_WALK_STEPS//4)
+                walk_step = guissian_sampling(self.num_of_steps, self.num_of_steps//4)
                 goal_loc = util.random_walk(self.map, (srow, scol), walk_step)
             goal_locs.append(goal_loc)
             print('\tagent ' + str(k), end=' ')
