@@ -47,7 +47,7 @@ class PlanVis:
 
         if in_arg.config is not None:
             config_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), in_arg.config)
-            with open(config_dir, 'r') as fin:
+            with open(config_dir, mode="r", encoding="utf-8") as fin:
                 tmp_config = yaml.load(fin, Loader=yaml.FullLoader)
         else:
             tmp_config["map_file"] = in_arg.map
@@ -205,7 +205,7 @@ class PlanVis:
         if map_file is None:
             map_file = self.map_file
 
-        with open(map_file, "r") as fin:
+        with open(map_file, mode="r", encoding="utf-8") as fin:
             fin.readline()  # ignore type
             self.height = int(fin.readline().strip().split(' ')[1])
             self.width  = int(fin.readline().strip().split(' ')[1])
@@ -226,7 +226,7 @@ class PlanVis:
         if scen_file is None:
             scen_file = self.scen_file
 
-        with open(scen_file, "r") as fin:
+        with open(scen_file, mode="r", encoding="utf-8") as fin:
             fin.readline()  # ignore the first line 'version 1'
             ag_counter:int = 0
             for line in fin.readlines():
@@ -247,7 +247,7 @@ class PlanVis:
             logging.warning("No path file is found!")
             return
 
-        with open(path_file, "r") as fin:
+        with open(path_file, mode="r", encoding="utf-8") as fin:
             ag_counter = 0
             for line in fin.readlines():
                 ag_idx = int(line.split(" ")[1].split(":")[0])
@@ -305,7 +305,7 @@ if __name__ == "__main__":
     parser.add_argument('--map', type=str, help="Path to the map file")
     parser.add_argument('--scen', type=str, help="Path to the scen file")
     parser.add_argument('--path', type=str, help="Path to the path file")
-    parser.add_argument('--n', type=int, default=np.inf, dest="num_of_agents", 
+    parser.add_argument('--n', type=int, default=np.inf, dest="num_of_agents",
                         help="Number of agents")
     parser.add_argument('--ppm', type=int, dest="pixel_per_move", help="Number of pixels per move")
     parser.add_argument('--mv', type=int, dest="moves", help="Number of moves per action")

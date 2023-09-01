@@ -42,7 +42,9 @@ class DataProcessor:
             'sub': 'Subtraction',
             'mul': 'Multiplication',
             'div': 'Average number\nof expansions',
-            'mod': 'Mod'
+            'mod': 'Mod',
+            'succ iterations': 'Number of successful iterations',
+            'failed iterations': 'Number of failed iterations'
         }
         self.x_labels:Dict[str,str] = {'num': 'Number of agents',
                                        'ins': 'MAPF Instance'}
@@ -692,6 +694,7 @@ if __name__ == '__main__':
     # data_processor.plot_fig(x_index='num', y_index='#pathfinding')
 
     data_processor.plot_fig(x_index='ins', y_index='solution cost')
+    # data_processor.plot_fig(x_index='ins', y_index='succ iterations')
     # data_processor.plot_fig(x_index='ins', y_index='#high-level generated')
     # data_processor.plot_fig(x_index='ins', y_index='#low-level expanded')
     # data_processor.plot_fig(x_index='ins', y_index='#backtrack')
