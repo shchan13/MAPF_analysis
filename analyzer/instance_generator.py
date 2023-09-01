@@ -1,6 +1,6 @@
-"""Generator for MAPF instance
+# -*- coding: UTF-8 -*-
+"""Generator for one-shot MAPF instance
 """
-# Instance generator for one-shot MAPF
 
 import os
 import sys
@@ -168,12 +168,12 @@ class InstanceGenerator:
             with open(write_to, mode='w', encoding='utf-8') as fout:
                 fout.write('version 1\n')
                 for ag_idx, agent in enumerate(ins.agents):
-                    write_line  = str(ag_idx) + '\t' + self.map_file + '\t'
-                    write_line += str(self.width) + '\t' + str(self.height) + '\t'
-                    write_line += str(agent.start_loc[1]) + '\t' + str(agent.start_loc[0]) + '\t'
-                    write_line += str(agent.goal_loc[1])  + '\t' + str(agent.goal_loc[0])  + '\t'
-                    write_line += str(0) + '\n'
-                    fout.write(write_line)
+                    wr_ln  = str(ag_idx) + '\t' + self.map_file + '\t'
+                    wr_ln += str(self.width) + '\t' + str(self.height) + '\t'
+                    wr_ln += str(agent.start_loc[1]) + '\t' + str(agent.start_loc[0]) + '\t'
+                    wr_ln += str(agent.goal_loc[1])  + '\t' + str(agent.goal_loc[0])  + '\t'
+                    wr_ln += str(0) + '\n'
+                    fout.write(wr_ln)
         print('Done!')
 
 
@@ -186,12 +186,12 @@ class InstanceGenerator:
         with open(write_to, mode='w', encoding='utf-8') as fout:
             fout.write('version 1\n')
             for ag_idx, agent in enumerate(instance.agents):
-                write_line  = str(ag_idx) + '\t' + self.map_file + '\t'
-                write_line += str(self.width) + '\t' + str(self.height) + '\t'
-                write_line += str(agent.start_loc[1]) + '\t' + str(agent.start_loc[0]) + '\t'
-                write_line += str(agent.goal_loc[1])  + '\t' + str(agent.goal_loc[0])  + '\t'
-                write_line += str(0) + '\n'
-                fout.write(write_line)
+                wr_ln  = str(ag_idx) + '\t' + self.map_file + '\t'
+                wr_ln += str(self.width) + '\t' + str(self.height) + '\t'
+                wr_ln += str(agent.start_loc[1]) + '\t' + str(agent.start_loc[0]) + '\t'
+                wr_ln += str(agent.goal_loc[1])  + '\t' + str(agent.goal_loc[0])  + '\t'
+                wr_ln += str(0) + '\n'
+                fout.write(wr_ln)
         print('Done!')
 
 

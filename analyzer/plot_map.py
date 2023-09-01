@@ -1,4 +1,3 @@
-#! /home/rdaneel/anaconda3/lib/python3.8
 # -*- coding: UTF-8 -*-
 """ Plot map """
 

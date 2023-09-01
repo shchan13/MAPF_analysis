@@ -1,4 +1,3 @@
-#! /home/rdaneel/anaconda3/lib/python3.8
 # -*- coding: UTF-8 -*-
 """Data processor"""
 
@@ -16,45 +15,35 @@ import util
 class DataProcessor:
     def __init__(self, in_config) -> None:
         self.config: Dict = {}
-        config_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), in_config)
+        config_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                  in_config)
         with open(config_dir, encoding='utf-8', mode='r') as fin:
             self.config = yaml.load(fin, Loader=yaml.FullLoader)
 
         # Plot parameters
         self.max_x_num = 5  # on the x-axis
-        self.fig_size:Tuple[int,int] = (self.config['figure_width'], self.config['figure_height'])
-        self.marker_size:int = self.config['marker_size'] # 25
-        self.line_width:float = self.config['line_width']  # 4.0
-        self.mark_width:float = self.config['marker_width']  # 4.0
-        self.text_size:int = self.config['text_size']
-        self.fig_axs:Dict[int, Tuple[int,int]] = {1: (1,1),
-                                                  2: (1,2),
-                                                  3: (1,3),
-                                                  4: (2,2),
-                                                  5: (1,5),
-                                                  6: (2,3),
-                                                  8: (2,4),
-                                                  9: (3,3)}
-        self.y_labels:Dict[str, str] = {'succ': 'Success rate',
-                                        'runtime': 'Runtime (sec)',
-                                        'runtime of detecting conflicts':\
-                                            'Runtiem of conflict detection (sec)',
-                                        'runtime of path finding': 'Runtime of path finding (sec)',
-                                        'solution cost': 'SOC',
-                                        '#low-level generated': 'Number of generated LL Nodes',
-                                        '#low-level expanded': 'Number of expansions',
-                                        '#high-level generated': 'Number of generated HL Nodes',
-                                        '#high-level expanded': 'Number expanded HL nodes',
-                                        '#pathfinding': 'Number of replaned Agents', # (K)
-                                        '#low-level search calls': 'Number of calls',
-                                        '#backtrack': 'Number of backtrackings', # (K)
-                                        '#restarts': 'Number of restarts', # (K)
-                                        'num_total_conf': 'Number of total Conflicts',
-                                        'add': 'Sum',
-                                        'sub': 'Subtraction',
-                                        'mul': 'Multiplication',
-                                        'div': 'Average number\nof expansions',
-                                        'mod': 'Mod'}
+
+        self.y_labels:Dict[str, str] = {
+            'succ': 'Success rate',
+            'runtime': 'Runtime (sec)',
+            'runtime of detecting conflicts': 'Runtiem of conflict detection (sec)',
+            'runtime of path finding': 'Runtime of path finding (sec)',
+            'solution cost': 'SOC',
+            '#low-level generated': 'Number of generated LL Nodes',
+            '#low-level expanded': 'Number of expansions',
+            '#high-level generated': 'Number of generated HL Nodes',
+            '#high-level expanded': 'Number expanded HL nodes',
+            '#pathfinding': 'Number of replaned Agents', # (K)
+            '#low-level search calls': 'Number of calls',
+            '#backtrack': 'Number of backtrackings', # (K)
+            '#restarts': 'Number of restarts', # (K)
+            'num_total_conf': 'Number of total Conflicts',
+            'add': 'Sum',
+            'sub': 'Subtraction',
+            'mul': 'Multiplication',
+            'div': 'Average number\nof expansions',
+            'mod': 'Mod'
+        }
         self.x_labels:Dict[str,str] = {'num': 'Number of agents',
                                        'ins': 'MAPF Instance'}
 
@@ -67,7 +56,7 @@ class DataProcessor:
         Returns:
             int, int: 2D position
         """
-        f_row = self.fig_axs[len(self.config['maps'])][1]
+        f_row = util.FIG_AXS[len(self.config['maps'])][1]
         return f_idx // f_row, f_idx % f_row
 
 
@@ -107,11 +96,15 @@ class DataProcessor:
 
                 for ag_num in _map_['num_of_agents']:
                     for scen in _map_['scens']:
-                        data_frame = util.get_csv_instance(self.config['exp_path'], _map_['name'],
-                                                           scen, ag_num, solver['name'])
+                        data_frame = util.get_csv_instance(self.config['exp_path'],
+                                                           _map_['name'],
+                                                           scen,
+                                                           ag_num,
+                                                           solver['name'])
                         for _, row in data_frame.iterrows():
                             succ_only = self.config['succ_only']
-                            if solver['name'] == 'LB':  # This is for Sum of lowerbounds
+                            # This is for Sum of lowerbounds
+                            if solver['name'] == 'LB':
                                 in_index = 'sum of distance'
                                 succ_only = False
                             _val_ = util.process_val(row[in_index], in_index, row['solution cost'],
@@ -266,10 +259,10 @@ class DataProcessor:
                 if (self.config['plot_std'] or self.config['plot_ci']) and len(_ci_) > 0:
                     in_axs.errorbar(_num_, _val_, yerr=_ci_,
                                     label=solver['label'],
-                                    linewidth=self.line_width,
+                                    linewidth=self.config['line_width'],
                                     markerfacecolor=mf_color,
-                                    markeredgewidth=self.mark_width,
-                                    ms=self.marker_size,
+                                    markeredgewidth=self.config['marker_width'],
+                                    ms=self.config['marker_size'],
                                     color=solver['color'],
                                     marker=solver['marker'],
                                     alpha=self.config['alpha'],
@@ -277,10 +270,10 @@ class DataProcessor:
                 else:
                     in_axs.plot(_num_, _val_,
                                 label=solver['label'],
-                                linewidth=self.line_width,
+                                linewidth=self.config['line_width'],
                                 markerfacecolor=mf_color,
-                                markeredgewidth=self.mark_width,
-                                ms=self.marker_size,
+                                markeredgewidth=self.config['marker_width'],
+                                ms=self.config['marker_size'],
                                 color=solver['color'],
                                 marker=solver['marker'],
                                 alpha=self.config['alpha'],
@@ -288,20 +281,20 @@ class DataProcessor:
             else:
                 if (self.config['plot_std'] or self.config['plot_ci']) and len(_ci_) > 0:
                     in_axs.errorbar(_num_, _val_, yerr=_ci_,
-                                    linewidth=self.line_width,
+                                    linewidth=self.config['line_width'],
                                     markerfacecolor=mf_color,
-                                    markeredgewidth=self.mark_width,
-                                    ms=self.marker_size,
+                                    markeredgewidth=self.config['marker_width'],
+                                    ms=self.config['marker_size'],
                                     color=solver['color'],
                                     marker=solver['marker'],
                                     alpha=self.config['alpha'],
                                     zorder=solver['zorder'])
                 else:
                     in_axs.plot(_num_, _val_,
-                                linewidth=self.line_width,
+                                linewidth=self.config['line_width'],
                                 markerfacecolor=mf_color,
-                                markeredgewidth=self.mark_width,
-                                ms=self.marker_size,
+                                markeredgewidth=self.config['marker_width'],
+                                ms=self.config['marker_size'],
                                 color=solver['color'],
                                 marker=solver['marker'],
                                 alpha=self.config['alpha'],
@@ -313,7 +306,7 @@ class DataProcessor:
             #     _ub_ = [_val_[i] + _ci_[i] for i in range(len(_val_))]
             #     in_axs.fill_between(_num_, _lb_, _ub_, color=solver['color'], alpha=0.2)
         if self.config['set_title']:
-            in_axs.set_title(in_map['label'], fontsize=self.text_size)
+            in_axs.set_title(in_map['label'], fontsize=self.config['text_size'])
 
         if len(_num_) > self.max_x_num and x_index == "ins":  # This is for instance analysis
             _num_ = list(range(len(_x_)//self.max_x_num, len(_x_)+1, len(_x_)//self.max_x_num))
@@ -321,8 +314,8 @@ class DataProcessor:
             _x_ = _num_
 
         in_axs.axes.set_xticks(_num_)
-        in_axs.axes.set_xticklabels(_x_, fontsize=self.text_size)
-        in_axs.set_xlabel(self.x_labels[x_index], fontsize=self.text_size)
+        in_axs.axes.set_xticklabels(_x_, fontsize=self.config['text_size'])
+        in_axs.set_xlabel(self.x_labels[x_index], fontsize=self.config['text_size'])
 
         y_list = in_axs.axes.get_yticks()
         if y_index == 'succ':
@@ -416,8 +409,8 @@ class DataProcessor:
             in_axs.yaxis.grid()
         if self.config['x_grid']:
             in_axs.xaxis.grid()
-        in_axs.axes.set_yticklabels(y_list, fontsize=self.text_size)
-        in_axs.set_ylabel(self.y_labels[y_index], fontsize=self.text_size)
+        in_axs.axes.set_yticklabels(y_list, fontsize=self.config['text_size'])
+        in_axs.set_ylabel(self.y_labels[y_index], fontsize=self.config['text_size'])
 
 
     def subplot_fig2(self, x_index, y_index, in_axs, in_result):
@@ -433,10 +426,10 @@ class DataProcessor:
 
             in_axs.plot(_num_, _val_,
                         label=solver['label'],
-                        linewidth=self.line_width,
+                        linewidth=self.config['line_width'],
                         markerfacecolor=mf_color,
-                        markeredgewidth=self.mark_width,
-                        ms=self.marker_size,
+                        markeredgewidth=self.config['marker_width'],
+                        ms=self.config['marker_size'],
                         color=solver['color'],
                         marker=solver['marker'])
 
@@ -446,8 +439,8 @@ class DataProcessor:
             _x_ = _num_
 
         in_axs.axes.set_xticks(_num_)
-        in_axs.axes.set_xticklabels(_x_, fontsize=self.text_size)
-        in_axs.set_xlabel(self.x_labels[x_index], fontsize=self.text_size)
+        in_axs.axes.set_xticklabels(_x_, fontsize=self.config['text_size'])
+        in_axs.set_xlabel(self.x_labels[x_index], fontsize=self.config['text_size'])
 
         y_list = in_axs.axes.get_yticks()
         if y_index == 'succ':
@@ -456,8 +449,8 @@ class DataProcessor:
         elif y_index == 'runtime':
             y_list = range(0, 61, 10)
             in_axs.axes.set_yticks(y_list)
-        in_axs.axes.set_yticklabels(y_list, fontsize=self.text_size)
-        in_axs.set_ylabel(self.y_labels[y_index], fontsize=self.text_size)
+        in_axs.axes.set_yticklabels(y_list, fontsize=self.config['text_size'])
+        in_axs.set_ylabel(self.y_labels[y_index], fontsize=self.config['text_size'])
 
 
     def get_avg_vals(self, y_index='succ'):
@@ -493,25 +486,25 @@ class DataProcessor:
 
 
     def plot_fig(self, x_index:str='num', y_index:str='succ'):
-        tmp_lw = self.line_width
+        tmp_lw = self.config['line_width']
         if x_index == 'ins':
-            self.line_width = 0.0
+            self.config['line_width'] = 0.0
         # Get the result from the experiments
         result = self.get_val(x_index, y_index)
 
         # Plot all the subplots on the figure
         plt.close('all')
 
-        fig, axs = plt.subplots(nrows=self.fig_axs[len(self.config['maps'])][0],
-                                ncols=self.fig_axs[len(self.config['maps'])][1],
-                                figsize=self.fig_size,
+        fig, axs = plt.subplots(nrows=util.FIG_AXS[len(self.config['maps'])][0],
+                                ncols=util.FIG_AXS[len(self.config['maps'])][1],
+                                figsize=(self.config['figure_width'], self.config['figure_height']),
                                 dpi=80, facecolor='w', edgecolor='k')
 
         for idx, _map_ in enumerate(self.config['maps']):
             frow, fcol = self.get_subfig_pos(idx)
             if len(self.config['maps']) == 1:
                 self.subplot_fig(x_index, y_index, axs, idx, _map_, result)
-            elif self.fig_axs[len(self.config['maps'])][0] == 1:
+            elif util.FIG_AXS[len(self.config['maps'])][0] == 1:
                 self.subplot_fig(x_index, y_index, axs[fcol], idx, _map_, result)
             else:
                 self.subplot_fig(x_index, y_index, axs[frow,fcol], idx, _map_, result)
@@ -537,9 +530,9 @@ class DataProcessor:
                     labelspacing=0.1,
                     columnspacing=1.0,
                     ncol=val_ncol,
-                    fontsize=self.text_size)
+                    fontsize=self.config['text_size'])
             else:
-                plt.legend(loc="lower left", fontsize=self.text_size)
+                plt.legend(loc="lower left", fontsize=self.config['text_size'])
 
         # fig_name = ''  # Set the figure name
         # for _map_ in self.config['maps']:
@@ -547,7 +540,7 @@ class DataProcessor:
         # fig_name += x_index + '_' + y_index + '_plot.png'
         # plt.savefig(fig_name)
         if x_index == 'ins':
-            self.line_width = tmp_lw  # set the line width back
+            self.config['line_width'] = tmp_lw  # set the line width back
 
         plt.show()
 
@@ -600,16 +593,16 @@ class DataProcessor:
                     result[_solver_['name']][_map_['name']]['val'].append(tmp_val)
 
         # Plot all the subplots on the figure
-        fig, axs = plt.subplots(nrows=self.fig_axs[len(self.config['maps'])][0],
-                                ncols=self.fig_axs[len(self.config['maps'])][1],
-                                figsize=self.fig_size,
+        fig, axs = plt.subplots(nrows=util.FIG_AXS[len(self.config['maps'])][0],
+                                ncols=util.FIG_AXS[len(self.config['maps'])][1],
+                                figsize=(self.config['figure_width'], self.config['figure_height']),
                                 dpi=80, facecolor='w', edgecolor='k')
 
         for idx, _map_ in enumerate(self.config['maps']):
             frow, fcol = self.get_subfig_pos(idx)
             if len(self.config['maps']) == 1:
                 self.subplot_fig(x_index, use_op, axs, idx, _map_, result)
-            elif self.fig_axs[len(self.config['maps'])][0] == 1:
+            elif util.FIG_AXS[len(self.config['maps'])][0] == 1:
                 self.subplot_fig(x_index, use_op, axs[fcol], idx, _map_, result)
             else:
                 self.subplot_fig(x_index, use_op, axs[frow,fcol], idx, _map_, result)
@@ -618,9 +611,9 @@ class DataProcessor:
 
         if self.config['set_legend']:
             if use_op == 'div':
-                plt.legend(loc="lower right", fontsize=self.text_size)
+                plt.legend(loc="lower right", fontsize=self.config['text_size'])
             else:
-                plt.legend(loc="best", fontsize=self.text_size)
+                plt.legend(loc="best", fontsize=self.config['text_size'])
 
         # fig_name = x_index + '_' + use_op + '_plot.png'
         # plt.savefig(fig_name)
@@ -634,28 +627,28 @@ class DataProcessor:
     #         results_list.append(result)
 
     #     # Plot all the subplots on the figure
-    #     fig, axs = plt.subplots(nrows=self.fig_axs[len(self.config['maps'])][0],
-    #                             ncols=self.fig_axs[len(self.config['maps'])][1],
-    #                             figsize=self.fig_size,
+    #     fig, axs = plt.subplots(nrows=util.FIG_AXS[len(self.config['maps'])][0],
+    #                             ncols=util.FIG_AXS[len(self.config['maps'])][1],
+    #                             figsize=(self.config['figure_width'], self.config['figure_height']),
     #                             dpi=80, facecolor='w', edgecolor='k')
 
     #     for idx, _map_ in enumerate(self.config['maps']):
     #         frow, fcol = self.get_subfig_pos(idx)
     #         if len(self.config['maps']) == 1:
     #             self.subplot_fig(x_index, y_index, axs, idx, _map_, results_list)
-    #         elif self.fig_axs[len(self.config['maps'])][0] == 1:
+    #         elif util.FIG_AXS[len(self.config['maps'])][0] == 1:
     #             self.subplot_fig(x_index, y_index, axs[fcol], idx, _map_, results_list)
     #         else:
     #             self.subplot_fig(x_index, y_index, axs[frow,fcol], idx, _map_, results_list)
 
     #     fig.tight_layout()
     #     if y_index == 'succ':
-    #         plt.legend(loc="lower left", fontsize=self.text_size)
+    #         plt.legend(loc="lower left", fontsize=self.config['text_size'])
     #     elif y_index == 'runtime' or y_index == '#low-level generated' or \
     #           y_index == '#high-level generated':
-    #         plt.legend(loc="upper left", fontsize=self.text_size)
+    #         plt.legend(loc="upper left", fontsize=self.config['text_size'])
     #     else:
-    #         plt.legend(loc="best", fontsize=self.text_size)
+    #         plt.legend(loc="best", fontsize=self.config['text_size'])
     #     fig_name = x_index + '_' + y_index + '_plot.png'
     #     plt.savefig(fig_name)
     #     plt.show()
@@ -678,7 +671,6 @@ class DataProcessor:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Take config.yaml as input!')
     parser.add_argument('--config', type=str, default='config.yaml')
-
     args = parser.parse_args()
 
     # Create data processor

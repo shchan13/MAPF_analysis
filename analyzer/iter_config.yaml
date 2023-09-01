@@ -1,0 +1,33 @@
+time_limit: 60
+time_gap: 15
+succ_only: false
+
+figure_width: 16
+figure_height: 12
+set_title: true
+set_legend: true
+marker_size: 0
+line_width: 4.0
+marker_width: 1.0
+text_size: 24
+alpha: 1.0
+
+set_shift: 0.1
+plot_ci: false
+plot_std: false
+y_grid: true
+x_grid: false
+
+x_labels: "runtime"
+y_labels: "sum of costs"
+
+files:
+  - path:   # path to the .csv file
+    label:  "PALNS(LACAM2, PP, NS:16, TD:4)"
+    color:  "deepskyblue"
+    marker: "o"
+
+  - path:   # path to the .csv file
+    label:  "LNS(LACAM2, PP, NS:16)"
+    color:  "orange"
+    marker: "d"

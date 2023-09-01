@@ -1,129 +1,91 @@
-#! /home/rdaneel/anaconda3/lib/python3.8
 # -*- coding: UTF-8 -*-
-"""Iteration processor"""
+'''Iteration processor'''
 
+import os
+import argparse
+from typing import Dict, List
+import yaml
 import matplotlib.pyplot as plt
-import numpy as np
+import util
 
-# Read files
-TEXT_SIZE=28
-LINE_WIDTH=2.5
-DATA_PATH="/home/rdaneel/PBS/local/maze-32-32-2/"
-file_names = ["RR_iteration_data.csv", "SR_iteration_data.csv"]
-iter_data = {"sum_cost": dict(), "sum_conflicts": dict(), "ll_calls":dict(), "acc_ll_calls":dict()}
-for fn in file_names:
-    with open(DATA_PATH+fn, "r") as fin:
-        line = fin.readline().rstrip("\n").split(",")
-        line.pop(0)
-        line.pop(-1)
-        iter_data["sum_cost"][fn] = [int(_ele_) for _ele_ in line]
+class IterProcessor:
+    def __init__(self, in_config) -> None:
+        self.config: Dict = {}
+        config_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                  in_config)
+        with open(config_dir, encoding='utf-8', mode='r') as fin:
+            self.config = yaml.load(fin, Loader=yaml.FullLoader)
 
-        line = fin.readline().rstrip("\n").split(",")
-        line.pop(0)
-        line.pop(-1)
-        iter_data["sum_conflicts"][fn] = [int(_ele_) for _ele_ in line]
+        self.files:str = self.config['files']  # [{path, label, color,...}, ...]
+        self.x_labels:str = self.config['x_labels']
+        self.y_labels:str = self.config['y_labels']
+        self.results:List = []
 
-        line = fin.readline().rstrip("\n").split(",")
-        line.pop(0)
-        line.pop(-1)
-        iter_data["ll_calls"][fn] = [int(_ele_) for _ele_ in line]
 
-# Transfer LNS data format
-LNS_FILE = "iter_stats-initLNS.csv"
-iter_data["sum_cost"][LNS_FILE] = list()
-iter_data["sum_conflicts"][LNS_FILE] = list()
-iter_data["ll_calls"][LNS_FILE] = list()
-iter_data["acc_ll_calls"][LNS_FILE] = list()
-with open(DATA_PATH+LNS_FILE, encoding="UTF-8", mode="r") as fin:
-    fin.readline()
-    for line in fin.readlines():
-        line = line.rstrip("\n").split(",")
-        iter_data["sum_cost"][LNS_FILE].append(int(line[0]))
-        iter_data["sum_conflicts"][LNS_FILE].append(int(line[1]))
-        iter_data["ll_calls"][LNS_FILE].append(int(line[3]))
-file_names.append(LNS_FILE)
+    def get_iter_val(self):
+        for curr in self.config['files']:
+            data_frame = util.read_file(curr['path'])
+            curr['data'] = data_frame
+            self.results.append(curr)
 
-for fn in file_names:
-    curr_sum = 0
-    iter_data["acc_ll_calls"][fn] = list()
-    for _ele_ in iter_data["ll_calls"][fn]:
-        curr_sum += _ele_
-        iter_data["acc_ll_calls"][fn].append(curr_sum)
 
-# TARGET_OBJECTIVE = "sum_cost"
-TARGET_OBJECTIVE = "sum_conflicts"
-max_size = max(len(iter_data[TARGET_OBJECTIVE][file_names[0]]),
-               len(iter_data[TARGET_OBJECTIVE][file_names[1]]),
-               len(iter_data[TARGET_OBJECTIVE][file_names[2]]))
-for fn in file_names:
-    if len(iter_data["sum_cost"][fn]) < max_size:
-        for _ in range(0, max_size-len(iter_data["sum_cost"][fn])):
-            iter_data["sum_cost"][fn].append(np.inf)
-        assert len(iter_data["sum_cost"][fn]) == max_size
-    if len(iter_data["sum_conflicts"][fn]) < max_size:
-        for _ in range(0, max_size-len(iter_data["sum_conflicts"][fn])):
-            iter_data["sum_conflicts"][fn].append(np.inf)
-        assert len(iter_data["sum_conflicts"][fn]) == max_size
-    if len(iter_data["ll_calls"][fn]) < max_size:
-        for _ in range(0, max_size-len(iter_data["ll_calls"][fn])):
-            iter_data["ll_calls"][fn].append(np.inf)
-        assert len(iter_data["ll_calls"][fn]) == max_size
-    if len(iter_data["acc_ll_calls"][fn]) < max_size:
-        for _ in range(0, max_size-len(iter_data["acc_ll_calls"][fn])):
-            iter_data["acc_ll_calls"][fn].append(np.inf)
-        assert len(iter_data["acc_ll_calls"][fn]) == max_size
+    def plot_fig(self):
+        plt.close('all')
+        _, axs = plt.subplots(nrows=1, ncols=1,
+                                figsize=(self.config['figure_width'], 
+                                         self.config['figure_height']),
+                                dpi=80, facecolor='w', edgecolor='k')
+        max_x_len = 0
+        for rst in self.results:
+            if len(rst['data']) > max_x_len:
+                max_x_len = len(rst['data'])
 
-# Plot all the subplots on the figure
-plt.close('all')
-plt.rcParams.update({'font.size': TEXT_SIZE})
-fig, axs = plt.subplots(nrows=2, ncols=1, figsize=(12,9), dpi=80, facecolor='w', edgecolor='k')
+        left_bd  = -1 * self.config['set_shift']
+        right_bd = self.config['set_shift']
+        plt_rng  = (right_bd - left_bd) / len(self.results)
 
-SHOW_SIZE = max_size
-axs[0].plot(range(1,SHOW_SIZE+1), iter_data[TARGET_OBJECTIVE][file_names[2]][:SHOW_SIZE],
-            label="MAPF-LNS2", color="green", linewidth=LINE_WIDTH)
-# axs[0].plot(range(1,SHOW_SIZE+1), iter_data[TARGET_OBJECTIVE][file_names[0]][:SHOW_SIZE],
-#             label="GPBS(PE,TR,IC,RR)", color="blue", linewidth=LINE_WIDTH+1)
-axs[0].plot(range(1,SHOW_SIZE+1), iter_data[TARGET_OBJECTIVE][file_names[1]][:SHOW_SIZE],
-            label="GPBS(PE,TR,IC,SR)", color="red", linewidth=LINE_WIDTH)
-axs[0].axhline(y = 0, color = 'grey', linewidth=0.5)
+        for rid,rst in enumerate(self.results):
+            mf_color= 'white' if 'markerfacecolor' not in rst.keys() \
+                else rst['markerfacecolor']
+            zord = 0 if 'zorder' not in rst.keys() else rst['zorder']
 
-# num_conf = iter_data[TARGET_OBJECTIVE][file_names[2]][SHOW_SIZE-1]
-# tmp_text = "MAPF-LNS2 timeout,\n" + str(num_conf) + " pairs left"
-# axs[0].annotate(tmp_text, color="black", xy=(SHOW_SIZE, num_conf+1), xytext=(1200, 150),
-#                 horizontalalignment='right',
-#                 fontsize=TEXT_SIZE-2, arrowprops=dict(color="black", shrink=0.05))
+            cur_x_pos = []
+            if self.config['x_labels'] == 'iteration':
+                cur_x_pos = [x + plt_rng*rid for x in range(1, max_x_len+1)]
+            else:
+                cur_x_pos = rst['data'][self.config['x_labels']]
 
-axs[1].plot(range(1,SHOW_SIZE+1), iter_data["acc_ll_calls"][file_names[2]][:SHOW_SIZE],
-            label="MAPF-LNS2", color="green", linewidth=LINE_WIDTH)
-# axs[1].plot(range(1,SHOW_SIZE+1), iter_data["acc_ll_calls"][file_names[0]][:SHOW_SIZE],
-#             label="GPBS(PE,TR,IC,RR)", color="blue", linewidth=LINE_WIDTH+1)
-axs[1].plot(range(1,SHOW_SIZE+1), iter_data["acc_ll_calls"][file_names[1]][:SHOW_SIZE],
-            label="GPBS(PE,TR,IC,SR)", color="red", linewidth=LINE_WIDTH)
+            axs.plot(cur_x_pos, rst['data'][self.config['y_labels']],
+                     label=rst['label'],
+                     linewidth=self.config['line_width'],
+                     marker=rst['marker'],
+                     ms=self.config['marker_size'],
+                     markerfacecolor=mf_color,
+                     markeredgewidth=self.config['marker_width'],
+                     color=rst['color'],
+                     alpha=self.config['alpha'],
+                     zorder=zord)
 
-axs[0].grid(axis="y")
-axs[1].grid(axis="y")
+        # x_labels = axs.axes.get_xticks()
+        # x_labels = [int(x) for x in x_labels]
+        # axs.axes.set_xticklabels(x_labels, fontsize=self.config['text_size'])
 
-axs[1].set_xlabel("Iteration")
-Y_LABEL = ""
-if TARGET_OBJECTIVE == "sum_conflicts":
-    Y_LABEL = "Number of \nconflicting pairs"
-if TARGET_OBJECTIVE == "sum_cost":
-    Y_LABEL = "SOC"
-axs[0].set_ylabel(Y_LABEL)
-axs[1].set_ylabel("Cumulative\nnumber of calls")
+        # y_labels = axs.axes.get_yticks()
+        # y_labels = [int(y) for y in y_labels]
+        # axs.axes.set_yticklabels(y_labels, fontsize=self.config['text_size'])
+        plt.xticks(fontsize=self.config['text_size'])
+        plt.xlabel(self.config['x_labels'], fontsize=self.config['text_size'])
+        plt.yticks(fontsize=self.config['text_size'])
+        plt.ylabel(self.config['y_labels'], fontsize=self.config['text_size'])
+        plt.legend(loc="best", fontsize=self.config['text_size'])
+        plt.show()
 
-leg = axs[0].legend(
-    loc="upper center",
-    bbox_to_anchor= (0.48, 1.25),
-    borderpad=0.1,
-    handletextpad=0.1,
-    labelspacing=0.1,
-    columnspacing=0.5,
-    ncol=3,
-    fontsize=TEXT_SIZE,
-    handlelength=0.5,
-)
-axs[0].set_yscale('log')
-axs[1].set_yscale('log')
-plt.tight_layout()
-plt.show()
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Take config.yaml as input!')
+    parser.add_argument('--config', type=str, default='config.yaml')
+    args = parser.parse_args()
+
+    iter_proc = IterProcessor(args.config)
+    iter_proc.get_iter_val()
+    iter_proc.plot_fig()

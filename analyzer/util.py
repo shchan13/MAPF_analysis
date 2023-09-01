@@ -1,4 +1,3 @@
-#! /home/rdaneel/anaconda3/lib/python3.8
 # -*- coding: UTF-8 -*-
 """Utility functions"""
 
@@ -6,13 +5,25 @@ import logging
 import os
 import sys
 import random
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 import pandas as pd
 import numpy as np
 
-LARGE_MAPS = ['den520d','warehouse-10-20-10-2-1','warehouse-20-40-10-2-1','warehouse-20-40-10-2-2']
-ANYTIME_SOLVERS = ['LACAMLNS', 'AnytimeCBS']
-
+LARGE_MAPS:List[str] = ['den520d',
+                        'warehouse-10-20-10-2-1',
+                        'warehouse-20-40-10-2-1',
+                        'warehouse-20-40-10-2-2']
+ANYTIME_SOLVERS:List[str] = ['LACAMLNS', 'AnytimeCBS']
+FIG_AXS:Dict[int, Tuple[int,int]] = {1: (1,1),
+                                     2: (1,2),
+                                     3: (1,3),
+                                     4: (2,2),
+                                     5: (1,5),
+                                     6: (2,3),
+                                     8: (2,4),
+                                     9: (3,3)}
+MAX_LABEL_NUM = 5
+LABEL_SCALE = 1000
 
 def read_file(in_path:str) -> pd.DataFrame:
     """ Read the csv file with pandas
@@ -116,8 +127,8 @@ def create_csv_file(exp_path:str, map_name:str, scen:str, ag_num:int, ins_num:in
         for j, val in enumerate(sorted_objs.items()):
             if j == target_idx:
                 tmp_row_val = tmp_rows[val[0]]
-                for _k_ in buffer.keys():
-                    buffer[_k_].append(tmp_row_val[_k_])
+                for k, _ in enumerate(tmp_row_val.items()):
+                    buffer[k].append(tmp_row_val[k])
                 break
 
     solver_type = sol_names[0].split('_')[0]
@@ -141,7 +152,7 @@ def process_val(raw_value, raw_index:str, solution_cost:int,
         return int(is_succ)
 
     if raw_index in ['runtime', 'runtime of initial solution']:
-        return min(raw_value, time_limit)
+        return min(max(raw_value, 0), time_limit)
 
     if raw_index in ['num_total_conf', 'num_0child'] and raw_value == 0:
         return np.inf
