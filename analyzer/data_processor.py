@@ -41,7 +41,7 @@ class DataProcessor:
             'add': 'Sum',
             'sub': 'Subtraction',
             'mul': 'Multiplication',
-            'div': 'Average number\nof expansions',
+            'div': 'SoC/LB', # 'Average number\nof expansions',
             'mod': 'Mod',
             'succ iterations': 'Number of successful iterations',
             'failed iterations': 'Number of failed iterations'
@@ -376,8 +376,8 @@ class DataProcessor:
                 y_list = [str(int(y//label_scale)) for y in y_list]
 
         elif y_index == 'div':
-            # y_list = [0, 0.5, 1.0, 1.5]
-            y_list = [0, 1, 2, 3, 4]
+            y_list = [0, 0.5, 1.0, 1.5, 2.0, 2.5]
+            # y_list = [0, 1, 2, 3, 4]
             in_axs.axes.set_yticks(y_list)
 
         elif y_index == 'num_total_conf':
@@ -515,7 +515,7 @@ class DataProcessor:
         # manager.full_screen_toggle()
         # plt.tight_layout(pad=0.05)
 
-        if len(self.config['solvers']) > 7:
+        if len(self.config['solvers']) > 3:
             # val_ncol = len(self.config['solvers'])
             val_ncol = int(np.ceil(len(self.config['solvers']) / 2))
 
@@ -612,10 +612,16 @@ class DataProcessor:
         fig.tight_layout()
 
         if self.config['set_legend']:
-            if use_op == 'div':
-                plt.legend(loc="lower right", fontsize=self.config['text_size'])
-            else:
-                plt.legend(loc="best", fontsize=self.config['text_size'])
+            # fig.legend(fontsize=self.config['text_size'])
+            val_ncol = int(np.ceil(len(self.config['solvers'])))
+            fig.legend(loc="upper center",
+                    bbox_to_anchor= (0.5, 1.01),
+                    borderpad=0.1,
+                    handletextpad=0.1,
+                    labelspacing=0.1,
+                    columnspacing=1.0,
+                    ncol=val_ncol,
+                    fontsize=self.config['text_size'])
 
         # fig_name = x_index + '_' + use_op + '_plot.png'
         # plt.savefig(fig_name)
@@ -693,7 +699,7 @@ if __name__ == '__main__':
     # data_processor.plot_fig(x_index='num', y_index='#backtrack')
     # data_processor.plot_fig(x_index='num', y_index='#pathfinding')
 
-    data_processor.plot_fig(x_index='ins', y_index='solution cost')
+    # data_processor.plot_fig(x_index='ins', y_index='solution cost')
     # data_processor.plot_fig(x_index='ins', y_index='succ iterations')
     # data_processor.plot_fig(x_index='ins', y_index='#high-level generated')
     # data_processor.plot_fig(x_index='ins', y_index='#low-level expanded')
@@ -705,5 +711,5 @@ if __name__ == '__main__':
 
     # data_processor.plot_op(x_index='ins',y_index1='#low-level expanded',
     #                        y_index2='#high-level generated',use_op='div')
-    # data_processor.plot_op(x_index='ins',y_index1='#low-level expanded',
-    #                        y_index2='#high-level expanded',use_op='div')
+    data_processor.plot_op(x_index='ins',y_index1='solution cost',
+                           y_index2='lower bound',use_op='div')

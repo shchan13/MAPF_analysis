@@ -6,6 +6,7 @@ import argparse
 from typing import Dict, List
 import tqdm
 import yaml
+import matplotlib as mlb
 import matplotlib.pyplot as plt
 import util
 import numpy as np
@@ -20,6 +21,11 @@ class IterProcessor:
         with open(config_dir, encoding='utf-8', mode='r') as fin:
             self.config = yaml.load(fin, Loader=yaml.FullLoader)
 
+        if 'start_iter' not in self.config:
+            self.config['start_iter'] = 0
+        if 'end_iter' not in self.config:
+            self.config['end_iter'] = np.inf
+
         self.files:str = self.config['files']  # [{path, label, color,...}, ...]
         self.x_labels:str = self.config['x_labels']
         self.y_labels:str = self.config['y_labels']
@@ -29,12 +35,16 @@ class IterProcessor:
     def get_iter_val(self):
         for curr in self.config['files']:
             data_frame = util.read_file(curr['path'])
-            curr['data'] = data_frame
+            if 'end_iter' not in self.config or self.config['end_iter'] > len(data_frame):
+                self.config['end_iter'] = len(data_frame)
+            curr['data'] = data_frame[self.config['start_iter']:self.config['end_iter']+1]
             self.results.append(curr)
         if self.config['y_labels'] == 'destroy weight':
             self.proc_multi_val('destroy weight')
         if self.config['y_labels'] == 'destroy probability':
             self.proc_multi_val('destroy probability')
+        if self.config['y_labels'] == 'agents':
+            self.proc_multi_val('agents')
 
 
     def proc_multi_val(self, col_name:str):
@@ -87,24 +97,52 @@ class IterProcessor:
                 widths = [x_pos[ii] - x_pos[ii-1] for ii in range(1,len(x_pos))]
                 x_pos.pop(-1)
                 bottom = [0 for _ in x_pos]
-                for idx in range(len(y_pos.iloc[0])):
+                for idx in range(len(y_pos.iloc[0])):  # idx: indices of destroy operators
                     cur_y:List = []
-                    for yval in y_pos:
-                        cur_y.append(yval[idx])
+                    for yvals in y_pos:
+                        cur_y.append(yvals[idx])
                     axs.bar(x_pos, cur_y, width=widths, align='edge', bottom=bottom,
                             label=DESTROY_STRATEGY[idx])
                     bottom = [bottom[j] + cur_y[j] for j in range(len(bottom))]
+
+            elif self.config['y_labels'] == 'agents':
+                replan_ag = []
+                for yvals in y_pos:
+                    cur_ag = [False] * self.config['agent_num']
+                    if yvals[0] != -1.0:
+                        for ag_ in yvals:
+                            cur_ag[int(ag_)] = True
+                    replan_ag.append(cur_ag)
+                replan_ag = np.array(replan_ag).T.tolist()
+
+                if self.config['x_labels'] == 'iteration':
+                    axs.imshow(replan_ag, aspect='auto',
+                               cmap=mlb.colors.ListedColormap(['white', 'black']))
+                    plt.xticks(np.arange(self.config['start_iter'],
+                                        self.config['start_iter']+len(replan_ag[0])+1,
+                                        len(replan_ag[0])/float(self.config['num_x_labels']),
+                                        dtype=np.int64))
+
+                elif self.config['x_labels'] == 'agents':
+                    x_pos = list(range(1, self.config['agent_num']+1))
+                    y_pos = [sum(ag_in_iter) for ag_in_iter in replan_ag]
+                    axs.bar(x_pos, y_pos, width=1.0,
+                            color=rst['color'],
+                            label=rst['label'],
+                            alpha=self.config['alpha'],
+                            zorder=zord)
+
             else:
                 axs.plot(x_pos, y_pos,
-                    label=rst['label'],
-                    linewidth=self.config['line_width'],
-                    marker=rst['marker'],
-                    ms=self.config['marker_size'],
-                    markerfacecolor=mf_color,
-                    markeredgewidth=self.config['marker_width'],
-                    color=rst['color'],
-                    alpha=self.config['alpha'],
-                    zorder=zord)
+                         label=rst['label'],
+                         linewidth=self.config['line_width'],
+                         marker=rst['marker'],
+                         ms=self.config['marker_size'],
+                         markerfacecolor=mf_color,
+                         markeredgewidth=self.config['marker_width'],
+                         color=rst['color'],
+                         alpha=self.config['alpha'],
+                         zorder=zord)
 
         # x_labels = [int(x) for x in x_labels]
         # axs.axes.set_xticklabels(x_labels, fontsize=self.config['text_size'])
@@ -119,6 +157,9 @@ class IterProcessor:
         if self.config['y_labels'] in ['destroy probability', 'destroy weight']:
             plt.yticks(np.arange(0, 1.01, 0.2))
         plt.yticks(fontsize=self.config['text_size'])
+
+        if self.config['y_labels'] == 'agents' and self.config['x_labels'] == 'agents':
+            self.config['y_labels'] = 'number of replans'
         plt.ylabel(self.config['y_labels'].capitalize(),
                    fontsize=self.config['text_size'])
 
@@ -130,8 +171,8 @@ class IterProcessor:
                        loc="best", fontsize=self.config['text_size'])
         else:
             plt.legend(loc="best", fontsize=self.config['text_size'])
-        plt.savefig(self.config['save_path'])
-        # plt.show()
+        # plt.savefig(self.config['save_path'])
+        plt.show()
         print('Done!')
 
 
