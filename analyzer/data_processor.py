@@ -376,7 +376,7 @@ class DataProcessor:
                 y_list = [str(int(y//label_scale)) for y in y_list]
 
         elif y_index == 'div':
-            y_list = [0, 0.5, 1.0, 1.5, 2.0, 2.5]
+            y_list = [0, 0.5, 1.0, 1.5, 2.0]
             # y_list = [0, 1, 2, 3, 4]
             in_axs.axes.set_yticks(y_list)
 
@@ -524,7 +524,7 @@ class DataProcessor:
         # plt.subplots_adjust(left=val_left, right=val_right, top=val_top, bottom=val_bottom)
 
         if self.config['set_legend']:
-            if len(self.config['maps']) > 1:
+            if len(self.config['maps']) > 3:
                 fig.legend(loc="upper center",
                     bbox_to_anchor= (0.5, 1.01),
                     borderpad=0.1,
@@ -610,11 +610,14 @@ class DataProcessor:
                 self.subplot_fig(x_index, use_op, axs[frow,fcol], idx, _map_, result)
 
         fig.tight_layout()
+        
+        val_ncol = len(self.config['solvers'])
+        if len(self.config['solvers']) > 3:
+            val_ncol = int(np.ceil(len(self.config['solvers']) / 2))
 
         if self.config['set_legend']:
-            # fig.legend(fontsize=self.config['text_size'])
-            val_ncol = int(np.ceil(len(self.config['solvers'])))
-            fig.legend(loc="upper center",
+            if len(self.config['maps']) > 4:
+                fig.legend(loc="upper center",
                     bbox_to_anchor= (0.5, 1.01),
                     borderpad=0.1,
                     handletextpad=0.1,
@@ -622,6 +625,8 @@ class DataProcessor:
                     columnspacing=1.0,
                     ncol=val_ncol,
                     fontsize=self.config['text_size'])
+            else:
+                plt.legend(loc="lower left", fontsize=self.config['text_size'])
 
         # fig_name = x_index + '_' + use_op + '_plot.png'
         # plt.savefig(fig_name)
