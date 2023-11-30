@@ -5,7 +5,7 @@
 import os
 import sys
 import argparse
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 import random
 import numpy as np
 import util
@@ -51,6 +51,62 @@ class InstanceGenerator:
         self.map_name = util.get_map_name(map_file)
         self.instances:List[Instance] = []
         self.num_of_steps:int = self.num_freespace * RANDOM_WALK_WEIGHT
+        self.is_lcc = False
+
+
+    def valid_loc(self, loc:Tuple[int,int]):
+        return 0 <= loc[0] < self.height and 0 <= loc[1] < self.width \
+            and self.map[loc[0]][loc[1]]
+
+
+    def find_lcc(self):  # Find the largest connected component
+        print('Find the largest connected component...', end='')
+        ccm_idx = 0
+        ccm_cnt:Dict = {ccm_idx: 0}
+        ccm = [[-1 for _ in range(self.width)] for _ in range(self.height)]
+
+        # Filter out the obstacles
+        for ii in range(self.height):
+            for jj in range(self.width):
+                if self.map[ii][jj] is False:
+                    ccm[ii][jj] = -2
+
+        for row_ in range(self.height):
+            for col_ in range(self.width):
+                if ccm[row_][col_] == -1:
+                    start_loc:Tuple[int,int] = (row_, col_)
+                    open_list:List[Tuple[int,int]] = [start_loc]
+                    while len(open_list) > 0:  # if open list is not empty
+                        curr:Tuple[int,int] = open_list.pop(0)
+                        if ccm[curr[0]][curr[1]] > -1:
+                            continue
+                        ccm[curr[0]][curr[1]] = ccm_idx
+                        ccm_cnt[ccm_idx] += 1
+                        next_loc = [(curr[0]-1, curr[1]), (curr[0]+1, curr[1]),
+                                    (curr[0], curr[1]-1), (curr[0], curr[1]+1)]
+                        for n_loc in next_loc:
+                            if self.valid_loc(n_loc) and ccm[n_loc[0]][n_loc[1]] == -1 \
+                                and n_loc not in open_list:
+                                open_list.append(n_loc)
+                    ccm_idx += 1
+                    ccm_cnt[ccm_idx] = 0
+
+        # ccm_arr = np.array(ccm)
+        # plt.imshow(ccm_arr, interpolation='none')
+        # plt.show()
+
+        if len(ccm_cnt) == 1:
+            print('Done!')
+            self.is_lcc = True
+            return
+
+        ccm_idx = max(zip(ccm_cnt.values(), ccm_cnt.keys()))[1]
+        for row_ in range(self.height):
+            for col_ in range(self.width):
+                if self.map[row_][col_] is True and ccm[row_][col_] != ccm_idx:
+                    self.map[row_][col_] = False
+        self.is_lcc = True
+        print('Done!')
 
 
     def generate_default_instances(self):
@@ -58,11 +114,55 @@ class InstanceGenerator:
         """
         for idx in range(self.num_of_ins):
             print('Generate instance '+ str(idx) + '... ')
-            self.instances.append(self.generate_instance())
+            self.instances.append(self.generate_instance_by_random_walk())
 
 
-    def generate_instance(self, num_agents:int=None):
-        """ Generate an instance
+    def generate_instance_by_lcc(self, num_agents:int=None):
+        """ Generate an instance only in the largest connected component
+        """
+        if self.is_lcc is False:
+            self.find_lcc()
+
+        if num_agents is None:
+            num_agents = self.num_of_agents
+        start_locs = []
+        goal_locs  = []
+        k = 0
+        while k < num_agents:
+            # Randomly generate start locations
+            srow = random.randint(0, self.height-1)
+            scol = random.randint(0, self.width-1)
+            if self.map[srow][scol] is False or (srow,scol) in start_locs:
+                continue
+            if self.map_name == 'warehouse-10-20-10-2-1' and scol in range(25, 136):
+                continue
+            start_locs.append((srow, scol))
+            k += 1
+
+        k = 0
+        while k < num_agents:
+            # Randomly generate goal locations
+            grow = random.randint(0, self.height-1)
+            gcol = random.randint(0, self.width-1)
+            if self.map[grow][gcol] is False or (grow,gcol) in goal_locs:
+                continue
+            if self.map_name == 'warehouse-10-20-10-2-1':
+                if gcol not in range(25, 136): # \
+                    # or (gcol in range(0, 25) and start_locs[k][1] in range(0, 25)) \
+                    # or (gcol in range(136, 161) and start_locs[k][1] in range(136, 161)):
+                    continue
+                # if gcol not in range(25, 136):
+                #     continue
+            goal_locs.append((grow, gcol))
+            k += 1
+
+        ins = Instance()
+        ins.generate_agents(start_locs, goal_locs)
+        return ins
+
+
+    def generate_instance_by_random_walk(self, num_agents:int=None):
+        """ Generate an instance by random walk
         """
         if num_agents is None:
             num_agents = self.num_of_agents
@@ -71,14 +171,14 @@ class InstanceGenerator:
         goal_locs  = []
         k = 0
         while k < num_agents:
-            # Random generate start location
-            srow = random.randint(0, self.width-1)
-            scol = random.randint(0, self.height-1)
+            # Randomly generate start locations
+            srow = random.randint(0, self.height-1)
+            scol = random.randint(0, self.width-1)
             if self.map[srow][scol] is False or (srow,scol) in start_locs:
                 continue
             start_locs.append((srow, scol))
 
-            # Generate goal location with random walk
+            # Generate goal locations with random walk
             walk_step = guissian_sampling(self.num_of_steps, self.num_of_steps//4)
             goal_loc = util.random_walk(self.map, (srow, scol), walk_step)
             while goal_loc in goal_locs:
@@ -117,7 +217,7 @@ class InstanceGenerator:
         new_agents = np.random.choice(np.arange(self.num_of_agents), size = num_new_agents)
 
         if random.random() > 0.8:  # Replace agents with new agents
-            tmp_ins = self.generate_instance(num_new_agents)
+            tmp_ins = self.generate_instance_by_random_walk(num_new_agents)
 
             for k in range(num_new_agents):
                 is_overlap = False
@@ -188,8 +288,8 @@ class InstanceGenerator:
             for ag_idx, agent in enumerate(instance.agents):
                 wr_ln  = str(ag_idx) + '\t' + self.map_file + '\t'
                 wr_ln += str(self.width) + '\t' + str(self.height) + '\t'
-                wr_ln += str(agent.start_loc[1]) + '\t' + str(agent.start_loc[0]) + '\t'
-                wr_ln += str(agent.goal_loc[1])  + '\t' + str(agent.goal_loc[0])  + '\t'
+                wr_ln += str(agent.start_loc[1]) + '\t' + str(agent.start_loc[0]) + '\t'  # col,row
+                wr_ln += str(agent.goal_loc[1])  + '\t' + str(agent.goal_loc[0])  + '\t'  # col,row
                 wr_ln += str(0) + '\n'
                 fout.write(wr_ln)
         print('Done!')
@@ -209,5 +309,5 @@ if __name__ == '__main__':
     ins_gen = InstanceGenerator(args.mapFile, args.agentNum, args.insNum)
     for ins_idx in range(args.insNum):
         print('Generate instance '+ str(args.startID + ins_idx) + '... ')
-        cur_ins = ins_gen.generate_instance(args.agentNum)
+        cur_ins = ins_gen.generate_instance_by_lcc(args.agentNum)
         ins_gen.write_instance(cur_ins, scen_dir, args.label+'-' + str(args.startID + ins_idx))

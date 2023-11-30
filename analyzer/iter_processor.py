@@ -11,7 +11,11 @@ import matplotlib.pyplot as plt
 import util
 import numpy as np
 
-DESTROY_STRATEGY = {0: 'Random', 1: 'Agent-based', 2: 'Intersection-based'}
+DESTROY_STRATEGY = {0: 'Random',
+                    1: 'Agent-based',
+                    2: 'Shortest-path-based',
+                    3: 'Intersection-based'}
+INT_MAX = 2147483647
 
 class IterProcessor:
     def __init__(self, in_config) -> None:
@@ -35,9 +39,8 @@ class IterProcessor:
     def get_iter_val(self):
         for curr in self.config['files']:
             data_frame = util.read_file(curr['path'])
-            if 'end_iter' not in self.config or self.config['end_iter'] > len(data_frame):
-                self.config['end_iter'] = len(data_frame)
-            curr['data'] = data_frame[self.config['start_iter']:self.config['end_iter']+1]
+            end_iter = min(self.config['end_iter'], len(data_frame))
+            curr['data'] = data_frame[self.config['start_iter']:end_iter+1]
             self.results.append(curr)
         if self.config['y_labels'] == 'destroy weight':
             self.proc_multi_val('destroy weight')
@@ -91,15 +94,33 @@ class IterProcessor:
             else:
                 x_pos = rst['data'][self.config['x_labels']].to_list()
 
-            y_pos = rst['data'][self.config['y_labels']]
-            if self.config['y_labels'] in ['destroy probability', 'destroy weight']:
+            y_pos = rst['data'][self.config['y_labels']].to_list()
+
+            if self.config['y_labels'] == 'sum of costs':
+                lb = rst['data']['sum of distances'].to_list()[0]
+                y_pos = [y - lb for y in y_pos]
+
+                axs.plot(x_pos, y_pos,
+                         label=rst['label'],
+                         linewidth=self.config['line_width'],
+                         marker=rst['marker'],
+                         ms=self.config['marker_size'],
+                         markerfacecolor=mf_color,
+                         markeredgewidth=self.config['marker_width'],
+                         color=rst['color'],
+                         alpha=self.config['alpha'],
+                         zorder=zord)
+
+            elif self.config['y_labels'] in ['destroy probability', 'destroy weight']:
                 x_pos.insert(0, 0.0)
                 widths = [x_pos[ii] - x_pos[ii-1] for ii in range(1,len(x_pos))]
                 x_pos.pop(-1)
                 bottom = [0 for _ in x_pos]
-                for idx in range(len(y_pos.iloc[0])):  # idx: indices of destroy operators
+                for idx in range(len(y_pos[0])):  # idx: indices of destroy operators
                     cur_y:List = []
                     for yvals in y_pos:
+                        if yvals[idx] > INT_MAX:
+                            yvals[idx] = np.inf
                         cur_y.append(yvals[idx])
                     axs.bar(x_pos, cur_y, width=widths, align='edge', bottom=bottom,
                             label=DESTROY_STRATEGY[idx])
@@ -133,6 +154,9 @@ class IterProcessor:
                             zorder=zord)
 
             else:
+                for (yid,yval) in enumerate(y_pos):
+                    if yval == INT_MAX:
+                        y_pos[yid] = np.inf
                 axs.plot(x_pos, y_pos,
                          label=rst['label'],
                          linewidth=self.config['line_width'],
@@ -171,7 +195,7 @@ class IterProcessor:
                        loc="best", fontsize=self.config['text_size'])
         else:
             plt.legend(loc="best", fontsize=self.config['text_size'])
-        # plt.savefig(self.config['save_path'])
+        plt.savefig(self.config['save_path'])
         plt.show()
         print('Done!')
 

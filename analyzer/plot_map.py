@@ -160,6 +160,11 @@ class MAPFRenderer:
 
 
     def load_agents(self, scen_file:str = None) -> None:
+        """ load agents' locations from the scen_file
+
+        Args:
+            scen_file (str, optional): the location of the scen file. Defaults to None.
+        """
         if scen_file is None:
             scen_file = self.config['scen_file']
 
@@ -178,6 +183,11 @@ class MAPFRenderer:
 
 
     def load_paths(self, path_file:str = None) -> None:
+        """ load paths from the path_file
+
+        Args:
+            path_file (str, optional): the location of the path file. Defaults to None.
+        """
         if path_file is None:
             path_file = self.config['path_file']
         if not os.path.exists(path_file):
@@ -204,7 +214,7 @@ class MAPFRenderer:
 
 
     def move_agents(self) -> None:
-        """Move agents from cur_timstep to cur_timestep+1 and increase the cur_timestep by 1
+        """ Move agents from cur_timstep to cur_timestep+1 and increase the cur_timestep by 1
         """
 
         while self.cur_timestep < self.makespan:
@@ -237,5 +247,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     mapf_renderer = MAPFRenderer(args.config)
-    # mapf_renderer.move_agents()
     mainloop()

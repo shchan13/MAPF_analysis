@@ -148,6 +148,9 @@ def process_val(raw_value, raw_index:str, solution_cost:int,
     is_anytime = solver_name in ANYTIME_SOLVERS
     is_succ = solution_cost >= 0 and (runtime <= time_limit or is_anytime)
 
+    if solver_name == 'SYNCLNS_16_4' and raw_index == 'iterations':
+        return raw_value * 4
+
     if raw_index  == 'succ':
         return int(is_succ)
 

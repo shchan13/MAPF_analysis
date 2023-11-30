@@ -5,7 +5,7 @@ import logging
 import os
 import sys
 import argparse
-from typing import Dict, List, Tuple
+from typing import Dict, List
 import yaml
 import matplotlib.pyplot as plt
 import numpy as np
@@ -38,16 +38,28 @@ class DataProcessor:
             '#backtrack': 'Number of backtrackings', # (K)
             '#restarts': 'Number of restarts', # (K)
             'num_total_conf': 'Number of total Conflicts',
+            'area under curve': 'Area under curve',
             'add': 'Sum',
             'sub': 'Subtraction',
             'mul': 'Multiplication',
-            'div': 'SoC/LB', # 'Average number\nof expansions',
+            'div': 'Sum of delay / lower bound', # 'Average number\nof expansions',
             'mod': 'Mod',
             'succ iterations': 'Number of successful iterations',
             'failed iterations': 'Number of failed iterations'
         }
         self.x_labels:Dict[str,str] = {'num': 'Number of agents',
-                                       'ins': 'MAPF Instance'}
+                                       'ins': 'MAPF instance'}
+
+        if self.config['should_sort'] is True:
+            tmp_solvers = []
+            for _solver_ in self.config['solvers']:
+                if _solver_['zorder'] == 0:
+                    tmp_solvers.append(_solver_)
+                    break
+            for _solver_ in self.config['solvers']:
+                if _solver_['name'] != tmp_solvers[0]['name']:
+                    tmp_solvers.append(_solver_)
+            self.config['solvers'] = tmp_solvers
 
 
     def get_subfig_pos(self, f_idx: int):
@@ -102,13 +114,18 @@ class DataProcessor:
                                                            _map_['name'],
                                                            scen,
                                                            ag_num,
-                                                           solver['name'])
+                                                           solver['name'],
+                                                           solver['dir_name'])
                         for _, row in data_frame.iterrows():
                             succ_only = self.config['succ_only']
                             # This is for Sum of lowerbounds
+                            ori_index = in_index
                             if solver['name'] == 'LB':
                                 in_index = 'sum of distance'
                                 succ_only = False
+                            if solver['name'] in ['LNS-LACAM2-PP_16_1', 'SYNCLNS_16_4'] and in_index == 'depth':
+                                in_index = 'succ iterations'
+                                
                             _val_ = util.process_val(row[in_index], in_index, row['solution cost'],
                                                      row['runtime'], self.config['time_limit'],
                                                      solver['name'], succ_only)
@@ -116,6 +133,7 @@ class DataProcessor:
                             result[solver['name']][_map_['name']]['val'].append(_val_)
                             result[solver['name']][_map_['name']]['x'].append(global_idx)
                             global_idx += 1
+                            in_index = ori_index
         return result
 
 
@@ -141,8 +159,12 @@ class DataProcessor:
                     _data_:List = []
                     for scen in _map_['scens']:
                         tmp_ins_num = 0
-                        data_frame = util.get_csv_instance(self.config['exp_path'], _map_['name'],
-                                                           scen, ag_num, solver['name'])
+                        data_frame = util.get_csv_instance(self.config['exp_path'],
+                                                           _map_['name'],
+                                                           scen,
+                                                           ag_num,
+                                                           solver['name'],
+                                                           solver['dir_name'])
                         for _, row in data_frame.iterrows():
                             tmp_ins_num += 1
                             raw_data = None
@@ -311,9 +333,16 @@ class DataProcessor:
             in_axs.set_title(in_map['label'], fontsize=self.config['text_size'])
 
         if len(_num_) > self.max_x_num and x_index == "ins":  # This is for instance analysis
-            _num_ = list(range(len(_x_)//self.max_x_num, len(_x_)+1, len(_x_)//self.max_x_num))
-            _num_.insert(0, 1)
+            # _num_ = list(range(len(_x_)//self.max_x_num, len(_x_)+1, len(_x_)//self.max_x_num))
+            # _num_.insert(0, 1)
+            _num_ = list(range(self.config['ins_num'], len(_x_)+1, self.config['ins_num']))
+            _num_ = [nn+0.5 for nn in _num_]
+            _num_.insert(0, 0.5)
             _x_ = _num_
+
+        if x_index == "ins":
+            for nn in _num_:
+                in_axs.axvline(x=nn, color='black', linewidth=0.5, linestyle='--')
 
         in_axs.axes.set_xticks(_num_)
         in_axs.axes.set_xticklabels(_x_, fontsize=self.config['text_size'])
@@ -376,8 +405,12 @@ class DataProcessor:
                 y_list = [str(int(y//label_scale)) for y in y_list]
 
         elif y_index == 'div':
-            y_list = [0, 0.5, 1.0, 1.5, 2.0]
-            # y_list = [0, 1, 2, 3, 4]
+            # y_list = [0, 1.0, 2.0, 3.0]
+            # y_list = [0, 0.5, 1.0, 1.5]
+            # y_list = [0, 0.5, 1.0, 1.5, 2.0]
+            # y_list = [0, 0.2, 0.4, 0.6, 0.8]
+            # y_list = [0, 0.25, 0.5, 0.75, 1.0]
+            y_list = [0, 0.25, 0.5]
             in_axs.axes.set_yticks(y_list)
 
         elif y_index == 'num_total_conf':
@@ -471,6 +504,25 @@ class DataProcessor:
         print (yaml.dump(output, allow_unicode=True, default_flow_style=False))
 
 
+    def get_avg_tmps(self):
+        results1 = self.get_ins_val('depth')
+        results2 = self.get_ins_val('iterations')
+        output = {}
+        for solver in self.config['solvers']:
+            output[solver['name']] = {}
+            for _map_ in self.config['maps']:
+                total_val = 0
+                total_ins = 0
+                for _id_, v1 in enumerate(results1[solver['name']][_map_['name']]['val']):
+                    v2 = results2[solver['name']][_map_['name']]['val'][_id_]
+                    total_val += (1 - (v1 /v2))
+                    total_ins += 1
+                tmp_avg = total_val / total_ins
+                output[solver['name']][_map_['name']] = tmp_avg
+        print (yaml.dump(output, allow_unicode=True, default_flow_style=False))
+
+
+
     def get_avg_vals_all(self, y_index='succ'):
         results = self.get_ins_val(y_index)
         output = {}
@@ -514,14 +566,13 @@ class DataProcessor:
         # manager = plt.get_current_fig_manager()
         # manager.full_screen_toggle()
         # plt.tight_layout(pad=0.05)
+        plt.tight_layout()
+        # plt.subplots_adjust(left=val_left, right=val_right, top=val_top, bottom=val_bottom)
 
+        val_ncol = len(self.config['solvers'])
         if len(self.config['solvers']) > 3:
             # val_ncol = len(self.config['solvers'])
             val_ncol = int(np.ceil(len(self.config['solvers']) / 2))
-
-        else:
-            val_ncol = len(self.config['solvers'])
-        # plt.subplots_adjust(left=val_left, right=val_right, top=val_top, bottom=val_bottom)
 
         if self.config['set_legend']:
             if len(self.config['maps']) > 3:
@@ -534,7 +585,7 @@ class DataProcessor:
                     ncol=val_ncol,
                     fontsize=self.config['text_size'])
             else:
-                plt.legend(loc="lower left", fontsize=self.config['text_size'])
+                plt.legend(loc='upper right', fontsize=self.config['text_size'])
 
         # fig_name = ''  # Set the figure name
         # for _map_ in self.config['maps']:
@@ -583,8 +634,8 @@ class DataProcessor:
                     elif use_op == 'div':
                         if tmp_val2 == 0:
                             tmp_val = np.inf
-                        else:
-                            tmp_val = float(tmp_val1) / float(tmp_val2)
+                        else:  # -1 for the sum of delay / lower bound
+                            tmp_val = (float(tmp_val1) / float(tmp_val2)) - 1
                     elif use_op == 'mod':
                         if tmp_val2 == 0:
                             tmp_val = np.inf
@@ -593,6 +644,27 @@ class DataProcessor:
 
                     result[_solver_['name']][_map_['name']]['x'].append(_x_)
                     result[_solver_['name']][_map_['name']]['val'].append(tmp_val)
+
+        if self.config['should_sort'] is True:
+            for _map_ in self.config['maps']:
+                for num_idx in range(len(_map_['num_of_agents'])):
+                    st_idx = num_idx*self.config['ins_num']
+                    ed_idx = (num_idx+1)*self.config['ins_num']
+                    init_solver_name = "PALNS-LACAM2-PP_16_4"  # self.config['solvers'][0]['name']
+
+                    base_rst = result[init_solver_name][_map_['name']]['val']
+                    base_rst = base_rst[st_idx : ed_idx]
+
+                    for sid in range(1, len(self.config['solvers'])):
+                        solver_name = self.config['solvers'][sid]['name']
+                        tmp_rst = result[solver_name][_map_['name']]['val']
+                        tmp_rst = tmp_rst[st_idx : ed_idx]
+                        zp = zip(base_rst, tmp_rst)
+                        tmp_rst = [x for _,x in sorted(zp)]
+                        result[solver_name][_map_['name']]['val'][st_idx : ed_idx] = tmp_rst
+
+                    base_rst = sorted(base_rst)
+                    result[init_solver_name][_map_['name']]['val'][st_idx : ed_idx] = base_rst
 
         # Plot all the subplots on the figure
         fig, axs = plt.subplots(nrows=util.FIG_AXS[len(self.config['maps'])][0],
@@ -610,13 +682,13 @@ class DataProcessor:
                 self.subplot_fig(x_index, use_op, axs[frow,fcol], idx, _map_, result)
 
         fig.tight_layout()
-        
+
         val_ncol = len(self.config['solvers'])
         if len(self.config['solvers']) > 3:
             val_ncol = int(np.ceil(len(self.config['solvers']) / 2))
 
         if self.config['set_legend']:
-            if len(self.config['maps']) > 4:
+            if len(self.config['maps']) > 3:
                 fig.legend(loc="upper center",
                     bbox_to_anchor= (0.5, 1.01),
                     borderpad=0.1,
@@ -626,10 +698,15 @@ class DataProcessor:
                     ncol=val_ncol,
                     fontsize=self.config['text_size'])
             else:
-                plt.legend(loc="lower left", fontsize=self.config['text_size'])
+                # fig.legend(loc="lower left",
+                #            bbox_to_anchor= (0.05, 0.08),
+                #            fontsize=self.config['text_size'])
+                fig.legend(loc="upper left",
+                        #    bbox_to_anchor= (-0.05, -0.08),
+                           fontsize=self.config['text_size'])
 
-        # fig_name = x_index + '_' + use_op + '_plot.png'
-        # plt.savefig(fig_name)
+        fig_name = self.config['maps'][0]['name'] + x_index + '_' + use_op + '_plot.svg'
+        plt.savefig(fig_name)
         plt.show()
 
     # def plot_hist_fig(self, x_index:str='num', y_index:List[str]=['num_ex_conf', 'num_in_conf']):
@@ -689,13 +766,19 @@ if __name__ == '__main__':
     # Create data processor
     data_processor = DataProcessor(args.config)
 
-    # data_processor.get_avg_vals(y_index='#low-level expanded')  # LL expanded nodes
-    # data_processor.get_avg_vals(y_index='#low-level search calls')  #  LL runs
+    # data_processor.get_avg_vals(y_index='area under curve')
+    # data_processor.get_avg_vals(y_index='iterations')
+    # data_processor.get_avg_vals(y_index='depth')
+    # data_processor.get_avg_vals(y_index='rss usage')
+    # data_processor.get_avg_tmps()
+
+    # data_processor.get_avg_vals(y_index='#low-level search calls')
     # data_processor.get_avg_vals(y_index='#high-level expanded')
     # data_processor.get_avg_vals(y_index='succ')
     # data_processor.get_avg_vals_all(y_index='succ')
 
-    # data_processor.plot_fig(x_index='num', y_index='succ')
+    data_processor.plot_fig(x_index='num', y_index='succ')
+    # data_processor.plot_fig(x_index='num', y_index='solution cost')
     # data_processor.plot_fig(x_index='num', y_index='runtime')
     # data_processor.plot_fig(x_index='num', y_index='#low-level search calls')
     # data_processor.plot_fig(x_index='num', y_index='#low-level expanded')
@@ -704,7 +787,10 @@ if __name__ == '__main__':
     # data_processor.plot_fig(x_index='num', y_index='#backtrack')
     # data_processor.plot_fig(x_index='num', y_index='#pathfinding')
 
+    # data_processor.plot_fig(x_index='ins', y_index='area under curve')
+    # data_processor.plot_fig(x_index='ins', y_index='iterations')
     # data_processor.plot_fig(x_index='ins', y_index='solution cost')
+    # data_processor.plot_fig(x_index='ins', y_index='runtime')
     # data_processor.plot_fig(x_index='ins', y_index='succ iterations')
     # data_processor.plot_fig(x_index='ins', y_index='#high-level generated')
     # data_processor.plot_fig(x_index='ins', y_index='#low-level expanded')
@@ -716,5 +802,7 @@ if __name__ == '__main__':
 
     # data_processor.plot_op(x_index='ins',y_index1='#low-level expanded',
     #                        y_index2='#high-level generated',use_op='div')
-    data_processor.plot_op(x_index='ins',y_index1='solution cost',
-                           y_index2='lower bound',use_op='div')
+
+    # data_processor.plot_fig(x_index='num', y_index='solution cost')
+    # data_processor.plot_op(x_index='ins',y_index1='solution cost',
+    #                        y_index2='lower bound',use_op='div')
