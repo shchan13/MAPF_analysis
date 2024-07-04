@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
-"""Plot a single figure
+"""
+Plot a single figure
 """
 
 import logging
@@ -11,10 +12,13 @@ from importlib.util import spec_from_file_location, module_from_spec
 import yaml
 import matplotlib.pyplot as plt
 import numpy as np
-from script import util
+import util
 
 
 class MAPFPlotter:
+    """Plotter for results
+    The results should be in the .csv format.
+    """
     def __init__(self, in_cfg) -> None:
         self.cfg:Dict = {}  # Configuration
         self.rst:Dict = {}  # Results
@@ -37,19 +41,20 @@ class MAPFPlotter:
 
 
     def get_val(self):
-        """
-        Get the data from each row according to the y axis. Compute the average,
-        standard deviation, and confidence interval of the obtained data.
+        """Get the data from each row according to the y axis.
+        Compute the average, standard deviation, and confidence interval
+        of the obtained data.
         """
         for p in self.cfg['plots']:
+            assert len(self.cfg['x_axis']['range']) == len(p['data'])
             self.rst[p['label']] = {}
             for it_id, it in enumerate(p['data']):
                 cur_x = self.cfg['x_axis']['range'][it_id]
-                self.rst[p['label']][cur_x] = {'data': [],
+                self.rst[p['label']][cur_x] = { 'data': [],
                                                 'avg': 0,
                                                 'std': 0.0,
-                                                'ci': 0.0}
-                for fin in it:
+                                                'ci': 0.0 }
+                for fin in it:  # Iterate over files per x-axis
                     prev_len = len(self.rst[p['label']][cur_x]['data'])
                     df = util.read_file(fin)
                     for row_id, row in df.iterrows():
@@ -74,7 +79,10 @@ class MAPFPlotter:
                     1.96 * self.rst[p['label']][cur_x]['std'] / np.sqrt(total_num)
 
 
-    def subplot_avg_fig(self):
+    def plot_fig(self):
+        """Plot function for customize x and y axes.
+        Save the figure in the .svg format
+        """
         fig = plt.figure(figsize=(self.cfg['fig_width'], self.cfg['fig_height']))
 
         left_bd = -1 * self.cfg['set_shift']
@@ -126,11 +134,12 @@ class MAPFPlotter:
                    fontsize=self.cfg['text_size']['y_axis'])
         plt.ylabel(self.cfg['y_axis']['label'],
                    fontsize=self.cfg['text_size']['y_axis'])
+
         plt.tight_layout()
         if 'title' in self.cfg.keys():
             fig.suptitle(self.cfg['title'], fontsize=self.cfg['text_size']['title'])
         plt.legend()
-        plt.savefig('./tmp.svg')
+        plt.savefig(self.cfg['output'])
         plt.show()
 
 
@@ -141,4 +150,4 @@ if __name__ == '__main__':
 
     mapf_plotter = MAPFPlotter(args.config)
     mapf_plotter.get_val()
-    mapf_plotter.subplot_avg_fig()
+    mapf_plotter.plot_fig()

@@ -6,6 +6,7 @@ set_legend: true
 legend_size: 8
 y_grid: true
 x_grid: false
+output: "local/tmp.svg"
 
 marker_size: 10
 line_width: 2.0
@@ -27,48 +28,59 @@ is_std: false
 is_ci: false
 
 y_axis:
-  label: "LL-EXP (M)"
-  scale: 1000000
-  range: [0, 5, 10, 15]
-  script: "local/operate.py"
+  label: "Success rate"
+  scale: 1
+  range: [0, 0.2, 0.4, 0.6, 0.8, 1.0]
+  script: "script/operate.py"
 
 x_axis:
   label: "Number of agents"  # "Suboptimality factor"
-  range: [50, 100, 150, 200]
+  range: [200, 400, 600, 800]
 
 # ---------- End: Instance configuration --------
 
 
 plots:
-  - label: "EECBS(w:1.05)"
+  - label: "ECBS(w:1.01)"
     color: "grey"
     markerfacecolor: "white"
     marker: "X"
     zorder: 0
     data:
-      - - "/home/rdaneel/Azure_results/random-32-32-20/EECBS/random-32-32-20-random-50-EECBS-1.05.csv"
-      - - "/home/rdaneel/Azure_results/random-32-32-20/EECBS/random-32-32-20-random-100-EECBS-1.05.csv"
-      - - "/home/rdaneel/Azure_results/random-32-32-20/EECBS/random-32-32-20-random-150-EECBS-1.05.csv"
-      - - "/home/rdaneel/Azure_results/random-32-32-20/EECBS/random-32-32-20-random-200-EECBS-1.05.csv"
+      - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_200_1.01_ECBS.csv"
+      - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_400_1.01_ECBS.csv"
+      - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_600_1.01_ECBS.csv"
+      - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_800_1.01_ECBS.csv"
 
-  - label: "FEECBS(w:1.05)"
+  - label: "ECBS-BP(w:1.01)"
     color: "deepskyblue"
     markerfacecolor: "white"
     marker: "o"
-    zorder: 0
+    zorder: 1
     data:
-      - - "/home/rdaneel/Azure_results/random-32-32-20/FEECBS/random-32-32-20-random-50-FEECBS-1.05.csv"
-      - - "/home/rdaneel/Azure_results/random-32-32-20/FEECBS/random-32-32-20-random-100-FEECBS-1.05.csv"
-      - - "/home/rdaneel/Azure_results/random-32-32-20/FEECBS/random-32-32-20-random-150-FEECBS-1.05.csv"
-      - - "/home/rdaneel/Azure_results/random-32-32-20/FEECBS/random-32-32-20-random-200-FEECBS-1.05.csv"
+      - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_200_1.01_ECBS-BP.csv"
+      - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_400_1.01_ECBS-BP.csv"
+      - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_600_1.01_ECBS-BP.csv"
+      - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_800_1.01_ECBS-BP.csv"
 
-  - label: "FEECBS-GGO(w:1.05)"
-    color: "red"
+  - label: "ECBS-BP-WDG(w:1.01)"
+    color: "pink"
     markerfacecolor: "white"
-    marker: "^"
-    zorder: 0
+    marker: "P"
+    zorder: 2
     data:
-      - - "/home/rdaneel/Azure_results/random-32-32-20/FEECBS_GGO/random-32-32-20-random-50-FEECBS_GGO-1.05.csv"
-      - - "/home/rdaneel/Azure_results/random-32-32-20/FEECBS_GGO/random-32-32-20-random-100-FEECBS_GGO-1.05.csv"
-      - - "/home/rdaneel/Azure_results/random-32-32-20/FEECBS_GGO/random-32-32-20-random-150-FEECBS_GGO-1.05.csv"
-      - - "/home/rdaneel/Azure_results/random-32-32-20/FEECBS_GGO/random-32-32-20-random-200-FEECBS_GGO-1.05.csv"
+      - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_200_1.01_ECBS-BP-WDG.csv"
+      - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_400_1.01_ECBS-BP-WDG.csv"
+      - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_600_1.01_ECBS-BP-WDG.csv"
+      - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_800_1.01_ECBS-BP-WDG.csv"
+
+  - label: "FECBS-BP-WDG(w:1.01)"
+    color: "green"
+    markerfacecolor: "white"
+    marker: "s"
+    zorder: 3
+    data:
+      - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_200_1.01_FECBS-BP-WDG.csv"
+      - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_400_1.01_FECBS-BP-WDG.csv"
+      - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_600_1.01_FECBS-BP-WDG.csv"
+      - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_800_1.01_FECBS-BP-WDG.csv"
