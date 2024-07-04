@@ -25,6 +25,7 @@ FIG_AXS:Dict[int, Tuple[int,int]] = {1: (1,1),
 MAX_LABEL_NUM = 5
 LABEL_SCALE = 1000
 
+
 def read_file(in_path:str) -> pd.DataFrame:
     """ Read the csv file with pandas
 
@@ -85,8 +86,6 @@ def get_csv_instance(exp_path:str, map_name:str, scen:str, ag_num:int,
     Returns:
         pd.DataFrame: the csv file
     """
-    if solver_name == 'LB':
-        solver_name = 'LACAMLNS'
     if solver_dir_name is None:
         solver_dir_name = solver_name
     return read_file(os.path.join(
@@ -148,8 +147,8 @@ def process_val(raw_value, raw_index:str, solution_cost:int,
     is_anytime = solver_name in ANYTIME_SOLVERS
     is_succ = solution_cost >= 0 and (runtime <= time_limit or is_anytime)
 
-    if solver_name == 'SYNCLNS_16_4' and raw_index == 'iterations':
-        return raw_value * 4
+    # if solver_name == 'SYNCLNS-LACAM2-PP_16_8' and raw_index == 'iterations':
+        # return raw_value * 8
 
     if raw_index  == 'succ':
         return int(is_succ)
@@ -168,6 +167,7 @@ def process_val(raw_value, raw_index:str, solution_cost:int,
 
     assert raw_value >= 0
     return raw_value
+
 
 def load_map(map_file:str):
     """load map from the map_file

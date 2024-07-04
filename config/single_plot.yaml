@@ -1,0 +1,74 @@
+# ---------- Figure configuration ---------------
+# title: "Den520d"
+fig_width: 3
+fig_height: 2
+set_legend: true
+legend_size: 8
+y_grid: true
+x_grid: false
+
+marker_size: 10
+line_width: 2.0
+marker_width: 2.0
+alpha: 1.0
+set_shift: 0
+text_size:
+  title: 10
+  x_axis: 12
+  y_axis: 12
+# ---------- End: Figure configuration ----------
+
+
+# ---------- Instance configuration -------------
+ins_num:    25
+time_limit: 60
+succ_only:  false
+is_std: false
+is_ci: false
+
+y_axis:
+  label: "LL-EXP (M)"
+  scale: 1000000
+  range: [0, 5, 10, 15]
+  script: "local/operate.py"
+
+x_axis:
+  label: "Number of agents"  # "Suboptimality factor"
+  range: [50, 100, 150, 200]
+
+# ---------- End: Instance configuration --------
+
+
+plots:
+  - label: "EECBS(w:1.05)"
+    color: "grey"
+    markerfacecolor: "white"
+    marker: "X"
+    zorder: 0
+    data:
+      - - "/home/rdaneel/Azure_results/random-32-32-20/EECBS/random-32-32-20-random-50-EECBS-1.05.csv"
+      - - "/home/rdaneel/Azure_results/random-32-32-20/EECBS/random-32-32-20-random-100-EECBS-1.05.csv"
+      - - "/home/rdaneel/Azure_results/random-32-32-20/EECBS/random-32-32-20-random-150-EECBS-1.05.csv"
+      - - "/home/rdaneel/Azure_results/random-32-32-20/EECBS/random-32-32-20-random-200-EECBS-1.05.csv"
+
+  - label: "FEECBS(w:1.05)"
+    color: "deepskyblue"
+    markerfacecolor: "white"
+    marker: "o"
+    zorder: 0
+    data:
+      - - "/home/rdaneel/Azure_results/random-32-32-20/FEECBS/random-32-32-20-random-50-FEECBS-1.05.csv"
+      - - "/home/rdaneel/Azure_results/random-32-32-20/FEECBS/random-32-32-20-random-100-FEECBS-1.05.csv"
+      - - "/home/rdaneel/Azure_results/random-32-32-20/FEECBS/random-32-32-20-random-150-FEECBS-1.05.csv"
+      - - "/home/rdaneel/Azure_results/random-32-32-20/FEECBS/random-32-32-20-random-200-FEECBS-1.05.csv"
+
+  - label: "FEECBS-GGO(w:1.05)"
+    color: "red"
+    markerfacecolor: "white"
+    marker: "^"
+    zorder: 0
+    data:
+      - - "/home/rdaneel/Azure_results/random-32-32-20/FEECBS_GGO/random-32-32-20-random-50-FEECBS_GGO-1.05.csv"
+      - - "/home/rdaneel/Azure_results/random-32-32-20/FEECBS_GGO/random-32-32-20-random-100-FEECBS_GGO-1.05.csv"
+      - - "/home/rdaneel/Azure_results/random-32-32-20/FEECBS_GGO/random-32-32-20-random-150-FEECBS_GGO-1.05.csv"
+      - - "/home/rdaneel/Azure_results/random-32-32-20/FEECBS_GGO/random-32-32-20-random-200-FEECBS_GGO-1.05.csv"

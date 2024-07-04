@@ -1,5 +1,4 @@
-# -*- coding: UTF-8 -*-
-'''Iteration processor'''
+"""Iteration processor"""
 
 import os
 import argparse
@@ -13,8 +12,7 @@ import numpy as np
 
 DESTROY_STRATEGY = {0: 'Random',
                     1: 'Agent-based',
-                    2: 'Shortest-path-based',
-                    3: 'Intersection-based'}
+                    2: 'Intersection-based'}
 INT_MAX = 2147483647
 
 class IterProcessor:
@@ -112,6 +110,8 @@ class IterProcessor:
                          zorder=zord)
 
             elif self.config['y_labels'] in ['destroy probability', 'destroy weight']:
+                y_pos.pop(0)
+                y_pos.insert(0,[1/3., 1/3., 1/3.])
                 x_pos.insert(0, 0.0)
                 widths = [x_pos[ii] - x_pos[ii-1] for ii in range(1,len(x_pos))]
                 x_pos.pop(-1)
@@ -187,15 +187,16 @@ class IterProcessor:
         plt.ylabel(self.config['y_labels'].capitalize(),
                    fontsize=self.config['text_size'])
 
-        if self.config['y_labels'] in ['destroy probability', 'destroy weight']:
-            handles, labels = plt.gca().get_legend_handles_labels()
-            order = list(DESTROY_STRATEGY.keys())
-            order.reverse()
-            plt.legend([handles[i] for i in order], [labels[i] for i in order],
-                       loc="best", fontsize=self.config['text_size'])
-        else:
-            plt.legend(loc="best", fontsize=self.config['text_size'])
-        plt.savefig(self.config['save_path'])
+        # if self.config['y_labels'] in ['destroy probability', 'destroy weight']:
+        #     handles, labels = plt.gca().get_legend_handles_labels()
+        #     order = list(DESTROY_STRATEGY.keys())
+        #     order.reverse()
+        #     plt.legend([handles[i] for i in order], [labels[i] for i in order],
+        #                loc="best", fontsize=self.config['text_size'])
+        # else:
+        #     plt.legend(loc="best", fontsize=self.config['text_size'])
+        plt.tight_layout()
+        plt.savefig(self.config['save_path'], dpi=200)
         plt.show()
         print('Done!')
 

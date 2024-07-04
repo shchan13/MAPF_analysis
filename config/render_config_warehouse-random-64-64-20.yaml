@@ -1,0 +1,7 @@
+map_file: "/home/rdaneel/mapf_benchmark/mapf-map/warehouse-random-64-64-20.map"
+scen_file: "/home/rdaneel/MAPF_analysis/local/scen-s2s/warehouse-random-64-64-20-s2s-1.scen"
+num_of_agents: 2000
+pixel_per_move: 3
+moves: 3
+plot_ag_num: true
+delay: 0.05

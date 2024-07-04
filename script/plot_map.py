@@ -15,7 +15,8 @@ COLORS: List[str] = ['deepskyblue', 'royalblue', 'orange', 'peru', 'pink',
                      'cyan', 'brown', 'olive', 'gray', 'crimson']
 
 class Action(Enum):
-    """Actions for each agent
+    """
+    Actions for each agent
 
     Args:
         Enum (int): 5 actions including going up, right, down, left, and wait
@@ -27,7 +28,8 @@ class Action(Enum):
     WAIT = 4
 
 class MAPFRenderer:
-    """Render MAPF instance
+    """
+    Render MAPF instance
     """
     def __init__(self, in_config) -> None:
         self.config: Dict = {}

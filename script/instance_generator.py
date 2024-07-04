@@ -1,6 +1,4 @@
-# -*- coding: UTF-8 -*-
-"""Generator for one-shot MAPF instance
-"""
+"""Generator for one-shot MAPF instance"""
 
 import os
 import sys
@@ -8,7 +6,7 @@ import argparse
 from typing import List, Tuple, Dict
 import random
 import numpy as np
-import util
+from script import util
 
 RANDOM_WALK_WEIGHT = 2
 GA_NUM_ITERATION  = 10000
@@ -136,6 +134,8 @@ class InstanceGenerator:
                 continue
             if self.map_name == 'warehouse-10-20-10-2-1' and scol in range(25, 136):
                 continue
+            if self.map_name == 'warehouse-random-64-64-20' and scol in range(31, 97):
+                continue
             start_locs.append((srow, scol))
             k += 1
 
@@ -147,12 +147,17 @@ class InstanceGenerator:
             if self.map[grow][gcol] is False or (grow,gcol) in goal_locs:
                 continue
             if self.map_name == 'warehouse-10-20-10-2-1':
-                if gcol not in range(25, 136): # \
-                    # or (gcol in range(0, 25) and start_locs[k][1] in range(0, 25)) \
-                    # or (gcol in range(136, 161) and start_locs[k][1] in range(136, 161)):
+                if gcol in range(25, 136)\
+                    or (gcol in range(0, 25) and start_locs[k][1] in range(0, 25))\
+                    or (gcol in range(136, 161) and start_locs[k][1] in range(136, 161)):  # s2s
                     continue
                 # if gcol not in range(25, 136):
                 #     continue
+            if self.map_name == 'warehouse-random-64-64-20':
+                if gcol in range(31, 97)\
+                    or (gcol in range(0, 31) and start_locs[k][1] in range(0, 31))\
+                    or (gcol in range(97, 128) and start_locs[k][1] in range(97, 128)):  # s2s
+                    continue
             goal_locs.append((grow, gcol))
             k += 1
 
