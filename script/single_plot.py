@@ -111,6 +111,7 @@ class MAPFPlotter:
                     alpha=self.cfg['alpha'],
                     markerfacecolor=p['markerfacecolor'],
                     linewidth=self.cfg['line_width'],
+                    markeredgewidth=self.cfg['marker_width'],
                     ms=self.cfg['marker_size'])
             else:
                 plt.plot(x, val,
@@ -121,6 +122,7 @@ class MAPFPlotter:
                     alpha=self.cfg['alpha'],
                     markerfacecolor=p['markerfacecolor'],
                     linewidth=self.cfg['line_width'],
+                    markeredgewidth=self.cfg['marker_width'],
                     ms=self.cfg['marker_size'])
 
         plt.xticks(x_num,

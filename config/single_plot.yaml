@@ -1,12 +1,12 @@
 # ---------- Figure configuration ---------------
 # title: "Den520d"
-fig_width: 3
-fig_height: 2
+fig_width: 6
+fig_height: 4
 set_legend: true
-legend_size: 8
+legend_size: 12
 y_grid: true
 x_grid: false
-output: "local/tmp.svg"
+output: "local/tmp.png"
 
 marker_size: 10
 line_width: 2.0
@@ -74,11 +74,22 @@ plots:
       - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_600_1.01_ECBS-BP-WDG.csv"
       - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_800_1.01_ECBS-BP-WDG.csv"
 
+  - label: "FECBS-BP(w:1.01)"
+    color: "red"
+    markerfacecolor: "white"
+    marker: "^"
+    zorder: 3
+    data:
+      - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_200_1.01_FECBS-BP.csv"
+      - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_400_1.01_FECBS-BP.csv"
+      - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_600_1.01_FECBS-BP.csv"
+      - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_800_1.01_FECBS-BP.csv"
+
   - label: "FECBS-BP-WDG(w:1.01)"
     color: "green"
     markerfacecolor: "white"
     marker: "s"
-    zorder: 3
+    zorder: 4
     data:
       - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_200_1.01_FECBS-BP-WDG.csv"
       - - "/home/rdaneel/AAAI_results/Paris-1-256/ECBS/Paris-1-256_random_400_1.01_FECBS-BP-WDG.csv"
