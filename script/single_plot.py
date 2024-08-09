@@ -65,7 +65,7 @@ class MAPFPlotter:
                     new_data_num =\
                         len(self.rst[p['label']][cur_x]['data']) - prev_len
                     if new_data_num < self.cfg['ins_num']:
-                        logging.warning(fin, ' does not match the instance number')
+                        logging.warning('%s does not match the instance number', fin)
 
                 total_num = len(self.rst[p['label']][cur_x]['data'])
 
