@@ -60,7 +60,7 @@ class MAPFPlotter:
                     for row_id, row in df.iterrows():
                         if row_id >= self.cfg['ins_num']:
                             break
-                        row_val = self.func.y_operate(row)
+                        row_val = self.func.y_operate(row, self.cfg)
                         self.rst[p['label']][cur_x]['data'].append(row_val)
                     new_data_num =\
                         len(self.rst[p['label']][cur_x]['data']) - prev_len
@@ -140,7 +140,7 @@ class MAPFPlotter:
         plt.tight_layout()
         if 'title' in self.cfg.keys():
             fig.suptitle(self.cfg['title'], fontsize=self.cfg['text_size']['title'])
-        plt.legend()
+        plt.legend(markerscale=0.7)
         plt.savefig(self.cfg['output'])
         plt.show()
 
