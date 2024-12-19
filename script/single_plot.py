@@ -140,10 +140,47 @@ class MAPFPlotter:
         plt.tight_layout()
         if 'title' in self.cfg.keys():
             fig.suptitle(self.cfg['title'], fontsize=self.cfg['text_size']['title'])
-        plt.legend(markerscale=0.7)
+        plt.legend(fontsize=self.cfg['text_size']['title'])  # markerscale=0.7, 
         plt.savefig(self.cfg['output'])
         plt.show()
 
+    def plot_fig_instance(self):
+        fig = plt.figure(figsize=(self.cfg['fig_width'], self.cfg['fig_height']))
+        x_num = range(1, len(self.cfg['x_axis']['range']) * self.cfg['ins_num'] +1)
+        for pid, p in enumerate(self.cfg['plots']):
+            val = []
+            for it_id in range(len(p['data'])):
+                cur_x = self.cfg['x_axis']['range'][it_id]
+                for y in self.rst[p['label']][cur_x]['data']:
+                    val.append(y)
+            plt.plot(x_num, val,
+                     label=p['label'],
+                     color=p['color'],
+                     marker=p['marker'],
+                     zorder=p['zorder'],
+                     alpha=self.cfg['alpha'],
+                     markerfacecolor=p['markerfacecolor'],
+                     linewidth=self.cfg['line_width'],
+                     markeredgewidth=self.cfg['marker_width'],
+                     ms=self.cfg['marker_size'])
+        plt.xticks([1, 5, 10, 15, 20, 25],  # , self.cfg['ins_num']*2, self.cfg['ins_num']*3
+                   labels=[1, 5, 10, 15, 20, 25], # self.cfg['ins_num']*2, self.cfg['ins_num']*3],
+                   fontsize=self.cfg['text_size']['x_axis'])
+        plt.xlabel(self.cfg['x_axis']['label'],
+                   fontsize=self.cfg['text_size']['x_axis'])
+
+        plt.yticks([r*self.cfg['y_axis']['scale'] for r in self.cfg['y_axis']['range']],
+                   labels=self.cfg['y_axis']['range'],
+                   fontsize=self.cfg['text_size']['y_axis'])
+        plt.ylabel(self.cfg['y_axis']['label'],
+                   fontsize=self.cfg['text_size']['y_axis'])
+
+        plt.tight_layout()
+        if 'title' in self.cfg.keys():
+            fig.suptitle(self.cfg['title'], fontsize=self.cfg['text_size']['title'])
+        plt.legend(fontsize=self.cfg['text_size']['title'])  # markerscale=0.7, 
+        plt.savefig(self.cfg['output'])
+        plt.show()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Take config.yaml as input')
@@ -153,3 +190,4 @@ if __name__ == '__main__':
     mapf_plotter = MAPFPlotter(args.config)
     mapf_plotter.get_val()
     mapf_plotter.plot_fig()
+    # mapf_plotter.plot_fig_instance()
