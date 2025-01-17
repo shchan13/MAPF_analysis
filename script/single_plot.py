@@ -3,16 +3,18 @@
 Plot a single figure
 """
 
-import logging
-import sys
-import os
 import argparse
+import logging
+import os
+import sys
+from importlib.util import module_from_spec, spec_from_file_location
+from math import inf
 from typing import Dict
-from importlib.util import spec_from_file_location, module_from_spec
-import yaml
+
 import matplotlib.pyplot as plt
 import numpy as np
 import util
+import yaml
 
 
 class MAPFPlotter:
@@ -28,7 +30,7 @@ class MAPFPlotter:
             self.cfg = yaml.load(fin, Loader=yaml.FullLoader)
 
         if 'ins_num' not in self.cfg.keys():
-            self.cfg['ins_num'] = np.inf
+            self.cfg['ins_num'] = inf
 
         # Create a module spec from the given path in configuration
         self.spec = spec_from_file_location('operate', self.cfg['y_axis']['script'])
@@ -62,21 +64,20 @@ class MAPFPlotter:
                             break
                         row_val = self.func.y_operate(row, self.cfg)
                         self.rst[p['label']][cur_x]['data'].append(row_val)
-                    new_data_num =\
-                        len(self.rst[p['label']][cur_x]['data']) - prev_len
+                    new_data_num = len(self.rst[p['label']][cur_x]['data']) - prev_len
                     if new_data_num < self.cfg['ins_num']:
                         logging.warning('%s does not match the instance number', fin)
 
-                total_num = len(self.rst[p['label']][cur_x]['data'])
-
+                # Compute statistic data ignoring inf
+                effective_data = []  # Operated data without inf
                 for val in self.rst[p['label']][cur_x]['data']:
-                    self.rst[p['label']][cur_x]['avg'] += val
-
-                self.rst[p['label']][cur_x]['avg'] /= total_num
-                self.rst[p['label']][cur_x]['std'] =\
-                    np.std(self.rst[p['label']][cur_x]['data'])
+                    if val is not inf:
+                        self.rst[p['label']][cur_x]['avg'] += val
+                        effective_data.append(val)
+                self.rst[p['label']][cur_x]['avg'] /= len(effective_data)
+                self.rst[p['label']][cur_x]['std'] = np.std(effective_data)
                 self.rst[p['label']][cur_x]['ci'] =\
-                    1.96 * self.rst[p['label']][cur_x]['std'] / np.sqrt(total_num)
+                    1.96 * self.rst[p['label']][cur_x]['std'] / np.sqrt(len(effective_data))
 
 
     def plot_fig(self):
@@ -84,6 +85,9 @@ class MAPFPlotter:
         Save the figure in the .svg format
         """
         fig = plt.figure(figsize=(self.cfg['fig_width'], self.cfg['fig_height']))
+        if 'title' in self.cfg.keys():
+            fig.suptitle(self.cfg['title'], fontsize=self.cfg['text_size']['title'])
+        plt.grid(axis='y')
 
         left_bd = -1 * self.cfg['set_shift']
         right_bd = self.cfg['set_shift']
@@ -138,16 +142,21 @@ class MAPFPlotter:
                    fontsize=self.cfg['text_size']['y_axis'])
 
         plt.tight_layout()
-        if 'title' in self.cfg.keys():
-            fig.suptitle(self.cfg['title'], fontsize=self.cfg['text_size']['title'])
         plt.legend(fontsize=self.cfg['text_size']['title'])  # markerscale=0.7, 
         plt.savefig(self.cfg['output'])
         plt.show()
 
     def plot_fig_instance(self):
+        """Plot the row values instance by instance
+        """
+
+        # Remove the line and decrease the alpha before plotting
+        self.cfg['line_width'] = 0.0
+        self.cfg['alpha'] = 0.8
+
         fig = plt.figure(figsize=(self.cfg['fig_width'], self.cfg['fig_height']))
         x_num = range(1, len(self.cfg['x_axis']['range']) * self.cfg['ins_num'] +1)
-        for pid, p in enumerate(self.cfg['plots']):
+        for p in self.cfg['plots']:
             val = []
             for it_id in range(len(p['data'])):
                 cur_x = self.cfg['x_axis']['range'][it_id]
@@ -163,8 +172,11 @@ class MAPFPlotter:
                      linewidth=self.cfg['line_width'],
                      markeredgewidth=self.cfg['marker_width'],
                      ms=self.cfg['marker_size'])
-        plt.xticks([1, 5, 10, 15, 20, 25],  # , self.cfg['ins_num']*2, self.cfg['ins_num']*3
-                   labels=[1, 5, 10, 15, 20, 25], # self.cfg['ins_num']*2, self.cfg['ins_num']*3],
+        xticks_list = [1]
+        for i in range(len(self.cfg['x_axis']['range'])):
+            xticks_list.append((i + 1) * self.cfg['ins_num'])
+        plt.xticks(xticks_list,
+                   labels=xticks_list,
                    fontsize=self.cfg['text_size']['x_axis'])
         plt.xlabel(self.cfg['x_axis']['label'],
                    fontsize=self.cfg['text_size']['x_axis'])
@@ -176,6 +188,7 @@ class MAPFPlotter:
                    fontsize=self.cfg['text_size']['y_axis'])
 
         plt.tight_layout()
+        plt.grid(axis='y')
         if 'title' in self.cfg.keys():
             fig.suptitle(self.cfg['title'], fontsize=self.cfg['text_size']['title'])
         plt.legend(fontsize=self.cfg['text_size']['title'])  # markerscale=0.7, 
