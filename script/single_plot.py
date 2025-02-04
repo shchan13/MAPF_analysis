@@ -74,11 +74,12 @@ class MAPFPlotter:
                     if val is not inf:
                         self.rst[p['label']][cur_x]['avg'] += val
                         effective_data.append(val)
-                self.rst[p['label']][cur_x]['avg'] /= len(effective_data)
-                self.rst[p['label']][cur_x]['std'] = np.std(effective_data)
-                self.rst[p['label']][cur_x]['ci'] =\
-                    1.96 * self.rst[p['label']][cur_x]['std'] / np.sqrt(len(effective_data))
-
+                if len(effective_data) > 0:
+                    self.rst[p['label']][cur_x]['avg'] /= len(effective_data)
+                    self.rst[p['label']][cur_x]['std'] = np.std(effective_data)
+                    self.rst[p['label']][cur_x]['ci'] =\
+                        1.96 * self.rst[p['label']][cur_x]['std'] / np.sqrt(len(effective_data))
+                print(p['label'], ',', cur_x, ': ', self.rst[p['label']][cur_x]['avg'])
 
     def plot_fig(self):
         """Plot function for customize x and y axes.
@@ -152,6 +153,7 @@ class MAPFPlotter:
 
         # Remove the line and decrease the alpha before plotting
         self.cfg['line_width'] = 0.0
+        self.cfg['marker_size'] = 5.0
         self.cfg['alpha'] = 0.8
 
         fig = plt.figure(figsize=(self.cfg['fig_width'], self.cfg['fig_height']))
