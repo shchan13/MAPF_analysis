@@ -41,6 +41,10 @@ class MAPFPlotter:
         # Execute the module to make its attributes accessible
         self.spec.loader.exec_module(self.func)
 
+        # Create the folder for self.cfg['output_dir']
+        if not os.path.isdir(self.cfg['output_dir']):
+            os.makedirs(self.cfg['output_dir'])
+
 
     def get_val(self):
         """Get the data from each row according to the y axis.
@@ -81,14 +85,12 @@ class MAPFPlotter:
                         1.96 * self.rst[p['label']][cur_x]['std'] / np.sqrt(len(effective_data))
                 print(p['label'], ',', cur_x, ': ', self.rst[p['label']][cur_x]['avg'])
 
+
     def plot_fig(self):
         """Plot function for customize x and y axes.
         Save the figure in the .svg format
         """
-        fig = plt.figure(figsize=(self.cfg['fig_width'], self.cfg['fig_height']))
-        if 'title' in self.cfg.keys():
-            fig.suptitle(self.cfg['title'], fontsize=self.cfg['text_size']['title'])
-        plt.grid(axis='y')
+        plt.figure(figsize=(self.cfg['fig_width'], self.cfg['fig_height']))
 
         left_bd = -1 * self.cfg['set_shift']
         right_bd = self.cfg['set_shift']
@@ -143,9 +145,13 @@ class MAPFPlotter:
                    fontsize=self.cfg['text_size']['y_axis'])
 
         plt.tight_layout()
-        plt.legend(fontsize=self.cfg['text_size']['title'])  # markerscale=0.7, 
-        plt.savefig(self.cfg['output'])
+        plt.grid(axis='y')
+        plt.legend(fontsize=self.cfg['text_size']['legend'])  # markerscale=0.7
+        if 'title' in self.cfg.keys():
+            plt.title(self.cfg['title'], fontsize=self.cfg['text_size']['title'])
+        plt.savefig(os.path.join(self.cfg['output_dir'], self.cfg['output_file']))
         plt.show()
+
 
     def plot_fig_instance(self):
         """Plot the row values instance by instance
@@ -156,7 +162,7 @@ class MAPFPlotter:
         self.cfg['marker_size'] = 5.0
         self.cfg['alpha'] = 0.8
 
-        fig = plt.figure(figsize=(self.cfg['fig_width'], self.cfg['fig_height']))
+        plt.figure(figsize=(self.cfg['fig_width'], self.cfg['fig_height']))
         x_num = range(1, len(self.cfg['x_axis']['range']) * self.cfg['ins_num'] +1)
         for p in self.cfg['plots']:
             val = []
@@ -191,10 +197,10 @@ class MAPFPlotter:
 
         plt.tight_layout()
         plt.grid(axis='y')
+        plt.legend(fontsize=self.cfg['text_size']['title'])
         if 'title' in self.cfg.keys():
-            fig.suptitle(self.cfg['title'], fontsize=self.cfg['text_size']['title'])
-        plt.legend(fontsize=self.cfg['text_size']['title'])  # markerscale=0.7, 
-        plt.savefig(self.cfg['output'])
+            plt.title(self.cfg['title'], fontsize=self.cfg['text_size']['title'])
+        plt.savefig(os.path.join(self.cfg['output_dir'], self.cfg['output_file']))
         plt.show()
 
 if __name__ == '__main__':
