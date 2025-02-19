@@ -91,6 +91,8 @@ class MAPFPlotter:
         Save the figure in the .svg format
         """
         plt.figure(figsize=(self.cfg['fig_width'], self.cfg['fig_height']))
+        if 'title' in self.cfg.keys():
+            plt.title(self.cfg['title'], fontsize=self.cfg['text_size']['title'])
 
         left_bd = -1 * self.cfg['set_shift']
         right_bd = self.cfg['set_shift']
@@ -147,8 +149,6 @@ class MAPFPlotter:
         plt.tight_layout()
         plt.grid(axis='y')
         plt.legend(fontsize=self.cfg['text_size']['legend'])  # markerscale=0.7
-        if 'title' in self.cfg.keys():
-            plt.title(self.cfg['title'], fontsize=self.cfg['text_size']['title'])
         plt.savefig(os.path.join(self.cfg['output_dir'], self.cfg['output_file']))
         plt.show()
 
@@ -163,6 +163,9 @@ class MAPFPlotter:
         self.cfg['alpha'] = 0.8
 
         plt.figure(figsize=(self.cfg['fig_width'], self.cfg['fig_height']))
+        if 'title' in self.cfg.keys():
+            plt.title(self.cfg['title'], fontsize=self.cfg['text_size']['title'])
+
         x_num = range(1, len(self.cfg['x_axis']['range']) * self.cfg['ins_num'] +1)
         for p in self.cfg['plots']:
             val = []
@@ -198,10 +201,9 @@ class MAPFPlotter:
         plt.tight_layout()
         plt.grid(axis='y')
         plt.legend(fontsize=self.cfg['text_size']['title'])
-        if 'title' in self.cfg.keys():
-            plt.title(self.cfg['title'], fontsize=self.cfg['text_size']['title'])
         plt.savefig(os.path.join(self.cfg['output_dir'], self.cfg['output_file']))
         plt.show()
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Take config.yaml as input')
