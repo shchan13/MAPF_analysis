@@ -29,11 +29,13 @@ def y_operate(row:Series, cfg:Dict):
     # return row['cleanup'] + 1
     # return row['runtime fval']
     # return row['root target conf']
-    return row['root conf']
+    # return row['root conf']
     # return row['ll gen']
     # return row['ll exp']
     # return row['ll search']
-    # return row['hl exp']
+    if (row['hl focal'] + row['hl open'] + row['hl cleanup']) == 0:
+        return inf
+    return  row['hl cleanup'] / (row['hl focal'] + row['hl open'] + row['hl cleanup'])
     # return row['root cost']
     # return min(row['runtime build HWY'], cfg['time_limit'])
     # return row['runtime build HWY']

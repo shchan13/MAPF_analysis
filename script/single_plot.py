@@ -148,7 +148,8 @@ class MAPFPlotter:
 
         plt.tight_layout()
         plt.grid(axis='y')
-        plt.legend(fontsize=self.cfg['text_size']['legend'])  # markerscale=0.7
+        if self.cfg['set_legend']:
+            plt.legend(fontsize=self.cfg['text_size']['legend'])  # markerscale=0.7
         plt.savefig(os.path.join(self.cfg['output_dir'], self.cfg['output_file']))
         plt.show()
 
