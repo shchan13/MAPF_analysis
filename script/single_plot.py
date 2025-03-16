@@ -161,7 +161,7 @@ class MAPFPlotter:
         # Remove the line and decrease the alpha before plotting
         self.cfg['line_width'] = 0.0
         self.cfg['marker_size'] = 5.0
-        self.cfg['alpha'] = 0.8
+        self.cfg['alpha'] = 0.6
 
         plt.figure(figsize=(self.cfg['fig_width'], self.cfg['fig_height']))
         if 'title' in self.cfg.keys():
@@ -201,7 +201,8 @@ class MAPFPlotter:
 
         plt.tight_layout()
         plt.grid(axis='y')
-        plt.legend(fontsize=self.cfg['text_size']['title'])
+        if self.cfg['set_legend']:
+            plt.legend(fontsize=self.cfg['text_size']['title'])
         plt.savefig(os.path.join(self.cfg['output_dir'], self.cfg['output_file']))
         plt.show()
 
