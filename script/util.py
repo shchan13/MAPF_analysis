@@ -96,12 +96,13 @@ def get_csv_instance(exp_path:str, map_name:str, scen:str, ag_num:int,
 def create_csv_file(exp_path:str, map_name:str, scen:str, ag_num:int, ins_num:int, sol_dir:str,
                     sol_names:List[str], mode:str='min', objective:str='runtime'):
     csv_files = {}
+    first_name = ""
     for idx, _name_ in enumerate(sol_names):
         csv_files[_name_] = get_csv_instance(exp_path, map_name, scen, ag_num, _name_, sol_dir)
         if idx == 0:
             first_name = _name_
 
-    # Sort the csv_files accroding to the objective
+    # Sort the csv_files according to the objective
     buffer = {}
     for col in csv_files[first_name].columns:
         buffer[col] = []

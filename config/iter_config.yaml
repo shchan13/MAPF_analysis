@@ -18,8 +18,13 @@ plot_std: false
 y_grid: true
 x_grid: false
 
-x_labels: "runtime"
-y_labels: "sum of costs"
+x_labels:
+  feature: "runtime"
+  label: "Runtime (sec)"
+
+y_labels: 
+  feature: "sum of costs"
+  label: "SOC"
 
 files:
   - path:   # path to the .csv file
