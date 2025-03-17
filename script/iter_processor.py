@@ -127,7 +127,7 @@ class IterProcessor:
             return 'white'
 
         plt.close('all')
-        fig, ax = plt.subplots(1, figsize=(self.cfg['fig_width'], 1))
+        _, ax = plt.subplots(1, figsize=(self.cfg['fig_width'], 1))
         for pid, p in enumerate(self.cfg['plots']):
             x_pos:List = self.rst[p['label']]['runtime']
 
@@ -163,10 +163,10 @@ class IterProcessor:
             return 'white'
 
         plt.close('all')
-        fig, ax = plt.subplots(figsize=(self.cfg['fig_width'] + 0.5, self.cfg['fig_height'] + 0.5),
-                               gridspec_kw={'height_ratios': [10, 1]},
-                               constrained_layout=True,
-                               nrows=2, ncols=1, sharex=True)
+        _, ax = plt.subplots(figsize=(self.cfg['fig_width'] + 0.5, self.cfg['fig_height'] + 0.5),
+                             gridspec_kw={'height_ratios': [10, 1]},
+                             constrained_layout=True,
+                             nrows=2, ncols=1, sharex=True)
         if 'title' in self.cfg.keys():
             ax[0].set_title(self.cfg['title'], fontsize=self.cfg['text_size']['title'])
 
