@@ -12,9 +12,6 @@ import numpy as np
 import util
 import yaml
 
-DESTROY_STRATEGY = {0: 'Random',
-                    1: 'Agent-based',
-                    2: 'Intersection-based'}
 INT_MAX = 2147483647
 
 class IterProcessor:
@@ -49,8 +46,8 @@ class IterProcessor:
     def get_iter_val(self):
         for p in self.cfg['plots']:
             self.rst[p['label']] = {
-                'runtime': [],
                 'data': [],
+                'runtime': [],
                 'expand_from': [],
                 'time gen': [],
                 'time exp': []
