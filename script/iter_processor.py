@@ -50,7 +50,7 @@ class IterProcessor:
         for p in self.cfg['plots']:
             self.rst[p['label']] = {'runtime': [], 'data': [], 'expand_from': []}
             df = util.read_file(p['data'])
-            end_iter = min(self.cfg['end_iter'], len(df))
+            end_iter = min(self.cfg['end_iter'], len(df)-1)
             df = df[self.cfg['start_iter']:end_iter+1]
             for _, row in df.iterrows():
                 row_val = self.func.y_operate(row, self.cfg)
@@ -175,6 +175,7 @@ class IterProcessor:
 
 
             y_pos = self.rst[p['label']]['data']
+            y_pos.pop()
             for (yid, yval) in enumerate(y_pos):
                 if yval == INT_MAX:
                     y_pos[yid] = np.inf
