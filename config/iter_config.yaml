@@ -1,38 +1,62 @@
-time_limit: 60
-time_gap: 15
-succ_only: false
-
-figure_width: 16
-figure_height: 12
-set_title: true
-set_legend: true
-marker_size: 0
-line_width: 4.0
-marker_width: 1.0
-text_size: 24
-alpha: 1.0
-
-set_shift: 0.1
-plot_ci: false
-plot_std: false
+# ---------- Figure configuration ---------------
+title: 'city'
+fig_width: 3
+fig_height: 2.1
+set_legend: false
+legend_size: 14
 y_grid: true
 x_grid: false
+output_dir: '/home/rdaneel/SOCS2025_CFD_results/svg'
 
-x_labels:
-  feature: "runtime"
-  label: "Runtime (sec)"
+marker_size: 6
+line_width: 1.2
+marker_width: 1.0
+alpha: 1.0
+set_shift: 0
+text_size:
+  title: 12
+  legend: 12
+  x_axis: 12
+  y_axis: 12
+# ---------- End: Figure configuration ----------
 
-y_labels: 
-  feature: "sum of costs"
-  label: "SOC"
+# ---------- Instance configuration -------------
+time_limit: 60
+time_gap: 30
 
-files:
-  - path:   # path to the .csv file
-    label:  "PALNS(LACAM2, PP, NS:16, TD:4)"
-    color:  "deepskyblue"
-    marker: "o"
+x_axis:
+  label: 'Runtime (sec)'
+  feature: 'runtime'
+  scale: 1
+  range: [0, 30, 60]
+  script: 'script/iter_operate.py'
 
-  - path:   # path to the .csv file
-    label:  "LNS(LACAM2, PP, NS:16)"
-    color:  "orange"
-    marker: "d"
+output_file: 'Boston_0_256_iter_subopt_EECBS-MFD.svg'
+y_axis:  # shown_val = (real_val - offset) / scale
+  label: 'SUBOPT'
+  offset: 0
+  scale: 1
+  range: [1, 1.01]
+  script: 'script/iter_operate.py'
+
+plots:
+  # - label:  'EECBS-RFD'
+  #   color: 'orange'
+  #   markerfacecolor: 'white'
+  #   marker: 'd'
+  #   zorder: 4
+  #   data: '/home/rdaneel/MHCBS/local/iter_Boston_0_256-random-7_EECBS-RSFX-BP-PC-CR-TR.csv'
+
+  # - label:  'EECBS-CFD'
+  #   color: 'dodgerblue'
+  #   markerfacecolor: 'white'
+  #   marker: 'o'
+  #   zorder: 5
+  #   data: '/home/rdaneel/MHCBS/local/iter_Boston_0_256-random-7_EECBS-CBFX-BP-PC-CR-TR.csv'
+
+  - label:  'EECBS-MFD'
+    color: 'red'
+    markerfacecolor: 'white'
+    marker: '^'
+    zorder: 6
+    data: '/home/rdaneel/MHCBS/local/iter_Boston_0_256-random-7_EECBS-MIXFX-BP-PC-CR-TR.csv'
