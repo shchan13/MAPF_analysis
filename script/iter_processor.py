@@ -172,17 +172,14 @@ class IterProcessor:
 
         for pid, p in enumerate(self.cfg['plots']):
             x_pos:List = self.rst[p['label']]['runtime']
-
-
             y_pos = self.rst[p['label']]['data']
-            y_pos.pop()
             for (yid, yval) in enumerate(y_pos):
                 if yval == INT_MAX:
                     y_pos[yid] = np.inf
                 else:
                     y_pos[yid] -= self.cfg['y_axis']['offset']
 
-            ax[0].plot(x_pos, y_pos,
+            ax[0].plot(x_pos[:-1], y_pos[:-1],
                        label=p['label'],
                        color=p['color'],
                        marker=p['marker'],
