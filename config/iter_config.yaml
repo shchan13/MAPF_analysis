@@ -23,6 +23,7 @@ text_size:
 # ---------- Instance configuration -------------
 time_limit: 60
 time_gap: 30
+# end_iter: 10
 
 x_axis:
   label: 'Runtime (sec)'
@@ -31,7 +32,14 @@ x_axis:
   range: [0, 30, 60]
   script: 'script/iter_operate.py'
 
-output_file: 'Boston_0_256_iter_subopt_EECBS-MFD.svg'
+# x_axis:
+#   label: 'Iteration (K)'
+#   feature: 'time gen'
+#   scale: 1000
+#   range: [0, 1, 2, 3]
+#   script: 'script/iter_operate.py'
+
+output_file: 'Boston_0_256_iter_subopt_EECBS-CFD.svg'
 y_axis:  # shown_val = (real_val - offset) / scale
   label: 'SUBOPT'
   offset: 0
@@ -39,24 +47,46 @@ y_axis:  # shown_val = (real_val - offset) / scale
   range: [1, 1.01]
   script: 'script/iter_operate.py'
 
+# output_file: 'Boston_0_256_iter_dist_togo_EECBS-CFD.svg'
+# y_axis:  # shown_val = (real_val - offset) / scale
+#   label: 'Number of conflicts'
+#   offset: 0
+#   scale: 1
+#   range: [0, 250, 500]
+#   script: 'script/iter_operate.py'
+
 plots:
+  # - label:  'EECBS'
+  #   color: 'grey'
+  #   markerfacecolor: 'white'
+  #   marker: 'X'
+  #   zorder: 1
+  #   data: '/home/rdaneel/MHCBS/local/iter_Boston_0_256-random-21_gen_EECBS-BP-PC-CR-TR.csv'
+
+  # - label:  'EECBS-GFD'
+  #   color: 'teal'
+  #   markerfacecolor: 'white'
+  #   marker: 'P'
+  #   zorder: 2
+  #   data: '/home/rdaneel/MHCBS/local/iter_Boston_0_256-random-21_gen_EECBS-FX-BP-PC-CR-TR.csv'
+
   # - label:  'EECBS-RFD'
   #   color: 'orange'
   #   markerfacecolor: 'white'
   #   marker: 'd'
   #   zorder: 4
-  #   data: '/home/rdaneel/MHCBS/local/iter_Boston_0_256-random-7_EECBS-RSFX-BP-PC-CR-TR.csv'
+  #   data: '/home/rdaneel/MHCBS/local/iter_Boston_0_256-random-21_exp_EECBS-RSFX-BP-PC-CR-TR.csv'
 
-  # - label:  'EECBS-CFD'
-  #   color: 'dodgerblue'
-  #   markerfacecolor: 'white'
-  #   marker: 'o'
-  #   zorder: 5
-  #   data: '/home/rdaneel/MHCBS/local/iter_Boston_0_256-random-7_EECBS-CBFX-BP-PC-CR-TR.csv'
-
-  - label:  'EECBS-MFD'
-    color: 'red'
+  - label:  'EECBS-CFD'
+    color: 'dodgerblue'
     markerfacecolor: 'white'
-    marker: '^'
-    zorder: 6
-    data: '/home/rdaneel/MHCBS/local/iter_Boston_0_256-random-7_EECBS-MIXFX-BP-PC-CR-TR.csv'
+    marker: 'o'
+    zorder: 5
+    data: '/home/rdaneel/MHCBS/local/iter_Boston_0_256-random-21_exp_EECBS-CBFX-BP-PC-CR-TR.csv'
+
+  # - label:  'EECBS-MFD'
+  #   color: 'red'
+  #   markerfacecolor: 'white'
+  #   marker: '^'
+  #   zorder: 6
+  #   data: '/home/rdaneel/MHCBS/local/iter_Boston_0_256-random-21_gen_EECBS-MIXFX-BP-PC-CR-TR.csv'

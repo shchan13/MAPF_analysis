@@ -48,7 +48,13 @@ class IterProcessor:
 
     def get_iter_val(self):
         for p in self.cfg['plots']:
-            self.rst[p['label']] = {'runtime': [], 'data': [], 'expand_from': []}
+            self.rst[p['label']] = {
+                'runtime': [],
+                'data': [],
+                'expand_from': [],
+                'time gen': [],
+                'time exp': []
+            }
             df = util.read_file(p['data'])
             end_iter = min(self.cfg['end_iter'], len(df)-1)
             df = df[self.cfg['start_iter']:end_iter+1]
@@ -57,6 +63,8 @@ class IterProcessor:
                 self.rst[p['label']]['data'].append(row_val)
                 self.rst[p['label']]['runtime'].append(row['runtime'])
                 self.rst[p['label']]['expand_from'].append(row['expand_from'])
+                self.rst[p['label']]['time gen'].append(row['time gen'])
+                self.rst[p['label']]['time exp'].append(row['time exp'])
 
 
     def plot_fig(self) -> None:
@@ -171,7 +179,7 @@ class IterProcessor:
             ax[0].set_title(self.cfg['title'], fontsize=self.cfg['text_size']['title'])
 
         for pid, p in enumerate(self.cfg['plots']):
-            x_pos:List = self.rst[p['label']]['runtime']
+            x_pos:List = self.rst[p['label']][self.cfg['x_axis']['feature']]
             y_pos = self.rst[p['label']]['data']
             for (yid, yval) in enumerate(y_pos):
                 if yval == INT_MAX:
@@ -208,7 +216,7 @@ class IterProcessor:
                          fontsize=self.cfg['text_size']['y_axis'])
         ax[0].grid(axis='y')
         ax[1].set_yticks([])
-        ax[1].set_xticks(list(self.cfg['x_axis']['range']),
+        ax[1].set_xticks([r*self.cfg['x_axis']['scale'] for r in self.cfg['x_axis']['range']],
                          labels=self.cfg['x_axis']['range'],
                          fontsize=self.cfg['text_size']['x_axis'])
         ax[1].set_xlabel(self.cfg['x_axis']['label'],
