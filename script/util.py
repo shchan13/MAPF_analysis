@@ -39,7 +39,7 @@ def read_file(in_path:str) -> pd.DataFrame:
         logging.error('%s does not exist!', in_path)
         sys.exit()
     else:
-        return pd.read_csv(in_path)
+        return pd.read_csv(in_path, low_memory=False)
 
 
 def get_file_dir(exp_path:str, map_name:str, solver_name:str) -> str:

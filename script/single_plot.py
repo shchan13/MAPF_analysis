@@ -119,6 +119,7 @@ class MAPFPlotter:
                     zorder=p['zorder'],
                     alpha=self.cfg['alpha'],
                     markerfacecolor=p['markerfacecolor'],
+                    linestyle=p['linestyle'],
                     linewidth=self.cfg['line_width'],
                     markeredgewidth=self.cfg['marker_width'],
                     ms=self.cfg['marker_size'])
@@ -128,8 +129,9 @@ class MAPFPlotter:
                     color=p['color'],
                     marker=p['marker'],
                     zorder=p['zorder'],
-                    alpha=self.cfg['alpha'],
+                    alpha=p['alpha'],
                     markerfacecolor=p['markerfacecolor'],
+                    linestyle=p['linestyle'],
                     linewidth=self.cfg['line_width'],
                     markeredgewidth=self.cfg['marker_width'],
                     ms=self.cfg['marker_size'])
@@ -147,7 +149,7 @@ class MAPFPlotter:
                    fontsize=self.cfg['text_size']['y_axis'])
 
         plt.tight_layout()
-        plt.grid(axis='y')
+        # plt.grid(axis='y')
         if self.cfg['set_legend']:
             plt.legend(fontsize=self.cfg['text_size']['legend'])  # markerscale=0.7
         plt.savefig(os.path.join(self.cfg['output_dir'], self.cfg['output_file']))

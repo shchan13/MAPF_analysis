@@ -21,6 +21,7 @@ text_size:
 # ---------- End: Figure configuration ----------
 
 # ---------- Instance configuration -------------
+subopt: 1.01
 time_limit: 60
 time_gap: 30
 # end_iter: 10
@@ -39,7 +40,7 @@ x_axis:
 #   range: [0, 1, 2, 3]
 #   script: 'script/iter_operate.py'
 
-output_file: 'Boston_0_256_iter_subopt_EECBS-CFD.svg'
+output_file: 'Boston_0_256_iter_subopt_EECBS-MFD.svg'
 y_axis:  # shown_val = (real_val - offset) / scale
   label: 'SUBOPT'
   offset: 0
@@ -70,6 +71,13 @@ plots:
   #   zorder: 2
   #   data: '/home/rdaneel/MHCBS/local/iter_Boston_0_256-random-21_gen_EECBS-FX-BP-PC-CR-TR.csv'
 
+  # - label:  'EECBS-CFD'
+  #   color: 'dodgerblue'
+  #   markerfacecolor: 'white'
+  #   marker: 'o'
+  #   zorder: 3
+  #   data: '/home/rdaneel/MHCBS/local/iter_Boston_0_256-random-21_exp_EECBS-CBFX-BP-PC-CR-TR.csv'
+
   # - label:  'EECBS-RFD'
   #   color: 'orange'
   #   markerfacecolor: 'white'
@@ -77,16 +85,9 @@ plots:
   #   zorder: 4
   #   data: '/home/rdaneel/MHCBS/local/iter_Boston_0_256-random-21_exp_EECBS-RSFX-BP-PC-CR-TR.csv'
 
-  - label:  'EECBS-CFD'
-    color: 'dodgerblue'
+  - label:  'EECBS-MFD'
+    color: 'red'
     markerfacecolor: 'white'
-    marker: 'o'
+    marker: '^'
     zorder: 5
-    data: '/home/rdaneel/MHCBS/local/iter_Boston_0_256-random-21_exp_EECBS-CBFX-BP-PC-CR-TR.csv'
-
-  # - label:  'EECBS-MFD'
-  #   color: 'red'
-  #   markerfacecolor: 'white'
-  #   marker: '^'
-  #   zorder: 6
-  #   data: '/home/rdaneel/MHCBS/local/iter_Boston_0_256-random-21_gen_EECBS-MIXFX-BP-PC-CR-TR.csv'
+    data: '/home/rdaneel/MHCBS/local/iter_Boston_0_256-random-21_exp_EECBS-MIXFX-BP-PC-CR-TR.csv'

@@ -48,20 +48,25 @@ class IterProcessor:
             self.rst[p['label']] = {
                 'data': [],
                 'runtime': [],
+                'gen_time': [],
                 'expand_from': [],
-                'time gen': [],
-                'time exp': []
+                'time_gen': [],
+                'time_exp': []
             }
             df = util.read_file(p['data'])
             end_iter = min(self.cfg['end_iter'], len(df)-1)
             df = df[self.cfg['start_iter']:end_iter+1]
+            self.cfg['init_lb'] = df.iloc[0]['global_lb']
             for _, row in df.iterrows():
+                if 'time_limit' in self.cfg and row['runtime'] > self.cfg['time_limit']:
+                    break
                 row_val = self.func.y_operate(row, self.cfg)
                 self.rst[p['label']]['data'].append(row_val)
                 self.rst[p['label']]['runtime'].append(row['runtime'])
+                self.rst[p['label']]['gen_time'].append(row['gen_runtime'])
                 self.rst[p['label']]['expand_from'].append(row['expand_from'])
-                self.rst[p['label']]['time gen'].append(row['time gen'])
-                self.rst[p['label']]['time exp'].append(row['time exp'])
+                self.rst[p['label']]['time_gen'].append(row['time_gen'])
+                self.rst[p['label']]['time_exp'].append(row['time_exp'])
 
 
     def plot_fig(self) -> None:
@@ -79,8 +84,10 @@ class IterProcessor:
             x_pos = []
             if self.cfg['x_axis']['feature'] == 'iteration':
                 x_pos = list(range(1, max_x_len + 1))
-            else:
+            elif self.cfg['x_axis']['feature'] == 'runtime':
                 x_pos = self.rst[p['label']]['runtime']
+            else:
+                x_pos = self.rst[p['label']]['feature']
 
             y_pos = self.rst[p['label']]['data']
             for (yid, yval) in enumerate(y_pos):
