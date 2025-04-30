@@ -6,7 +6,7 @@ import argparse
 from typing import List, Tuple, Dict
 import random
 import numpy as np
-from script import util
+import util
 
 RANDOM_WALK_WEIGHT = 2
 GA_NUM_ITERATION  = 10000
@@ -115,7 +115,7 @@ class InstanceGenerator:
             self.instances.append(self.generate_instance_by_random_walk())
 
 
-    def generate_instance_by_lcc(self, num_agents:int=None):
+    def generate_instance_by_lcc(self, num_agents:int=None, ins_file:str=''):
         """ Generate an instance only in the largest connected component
         """
         if self.is_lcc is False:
@@ -126,38 +126,48 @@ class InstanceGenerator:
         start_locs = []
         goal_locs  = []
         k = 0
+
+        # Load the existing instance from the ins_file
+        if ins_file != '':
+            ins_locs:Dict[str, List[tuple[int, int]]] = util.load_instance(ins_file, num_agents)
+            start_locs = ins_locs['start']
+            goal_locs = ins_locs['goal']
+            assert len(start_locs) == len(goal_locs)
+            k += len(start_locs)
+
+        cur_agent_num = k
         while k < num_agents:
             # Randomly generate start locations
             srow = random.randint(0, self.height-1)
             scol = random.randint(0, self.width-1)
             if self.map[srow][scol] is False or (srow,scol) in start_locs:
                 continue
-            if self.map_name == 'warehouse-10-20-10-2-1' and scol in range(25, 136):
-                continue
-            if self.map_name == 'warehouse-random-64-64-20' and scol in range(31, 97):
-                continue
+            # if self.map_name == 'warehouse-10-20-10-2-1' and scol in range(25, 136):
+            #     continue
+            # if self.map_name == 'warehouse-random-64-64-20' and scol in range(31, 97):
+            #     continue
             start_locs.append((srow, scol))
             k += 1
 
-        k = 0
+        k = cur_agent_num  # Reset the current agent number
         while k < num_agents:
             # Randomly generate goal locations
             grow = random.randint(0, self.height-1)
             gcol = random.randint(0, self.width-1)
             if self.map[grow][gcol] is False or (grow,gcol) in goal_locs:
                 continue
-            if self.map_name == 'warehouse-10-20-10-2-1':
-                if gcol in range(25, 136)\
-                    or (gcol in range(0, 25) and start_locs[k][1] in range(0, 25))\
-                    or (gcol in range(136, 161) and start_locs[k][1] in range(136, 161)):  # s2s
-                    continue
-                # if gcol not in range(25, 136):
-                #     continue
-            if self.map_name == 'warehouse-random-64-64-20':
-                if gcol in range(31, 97)\
-                    or (gcol in range(0, 31) and start_locs[k][1] in range(0, 31))\
-                    or (gcol in range(97, 128) and start_locs[k][1] in range(97, 128)):  # s2s
-                    continue
+            # if self.map_name == 'warehouse-10-20-10-2-1':
+            #     if gcol in range(25, 136)\
+            #         or (gcol in range(0, 25) and start_locs[k][1] in range(0, 25))\
+            #         or (gcol in range(136, 161) and start_locs[k][1] in range(136, 161)):  # s2s
+            #         continue
+            #     # if gcol not in range(25, 136):
+            #     #     continue
+            # if self.map_name == 'warehouse-random-64-64-20':
+            #     if gcol in range(31, 97)\
+            #         or (gcol in range(0, 31) and start_locs[k][1] in range(0, 31))\
+            #         or (gcol in range(97, 128) and start_locs[k][1] in range(97, 128)):  # s2s
+            #         continue
             goal_locs.append((grow, gcol))
             k += 1
 
@@ -301,18 +311,25 @@ class InstanceGenerator:
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Arguments for instacne generator')
-    parser.add_argument('--mapFile',  type=str, default='./example/random-32-32-20.map')
-    parser.add_argument('--agentNum',  type=int, default=1)
-    parser.add_argument('--insNum',  type=int, default=1)
-    parser.add_argument('--outDir',  type=str, default='../local')
-    parser.add_argument('--label',  type=str, default='tmp')
-    parser.add_argument('--startID',  type=int, default=1)
+    parser = argparse.ArgumentParser(description='Arguments for instance generator')
+    parser.add_argument('--mapFile', type=str, default='./example/random-32-32-20.map')
+    parser.add_argument('--mapName', type=str, default='random-32-32-20')
+    parser.add_argument('--inScen', type=str, default='')
+    parser.add_argument('--agentNum', type=int, default=1)
+    parser.add_argument('--insNum', type=int, default=1)
+    parser.add_argument('--outDir', type=str, default='../local')
+    parser.add_argument('--outScen', type=str, default='tmp')
+    parser.add_argument('--startID', type=int, default=1)
     args = parser.parse_args()
 
-    scen_dir = args.outDir+'/scen-'+args.label
+    scen_dir = args.outDir+'/scen-' + args.outScen
     ins_gen = InstanceGenerator(args.mapFile, args.agentNum, args.insNum)
     for ins_idx in range(args.insNum):
-        print('Generate instance '+ str(args.startID + ins_idx) + '... ')
-        cur_ins = ins_gen.generate_instance_by_lcc(args.agentNum)
-        ins_gen.write_instance(cur_ins, scen_dir, args.label+'-' + str(args.startID + ins_idx))
+        cur_idx = args.startID + ins_idx
+        INS_FILE = ''
+        if args.inScen in ['even', 'random']:
+            INS_FILE = '/home/rdaneel/mapf_benchmark/scen-' + args.inScen +\
+                '/' + ins_gen.map_name + '-' + args.inScen + '-' + str(cur_idx) + '.scen'
+        print('Generate instance '+ str(cur_idx) + '... ')
+        cur_ins = ins_gen.generate_instance_by_lcc(args.agentNum, INS_FILE)
+        ins_gen.write_instance(cur_ins, scen_dir, args.outScen+'-' + str(cur_idx))

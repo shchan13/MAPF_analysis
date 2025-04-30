@@ -193,6 +193,33 @@ def load_map(map_file:str):
     return height, width, out_map, num_freespace
 
 
+def load_instance(ins_file:str, agent_num:int=-1):
+    """load the MAPF instance from ins_file
+
+    Args:
+        ins_file (str): file path of the MAPF instance
+
+    Returns:
+        Dict: start and goal locations of all agents
+    """
+    ins_locs:Dict[str:List[tuple[int,int]]] = {"start": [], "goal": []}
+    with open(ins_file, mode="r", encoding="UTF-8") as fin:
+        fin.readline()  # skip version line
+        for idx, line in enumerate(fin.readlines()):
+            if idx == agent_num:  # idx equals the number of agents in the list
+                break
+            line = line.strip("\n").split("\t")
+            start_col = int(line[4])
+            start_row = int(line[5])
+            goal_col = int(line[6])
+            goal_row = int(line[7])
+            ins_locs["start"].append((start_row, start_col))
+            ins_locs["goal"].append((goal_row, goal_col))
+    assert len(ins_locs["start"]) == len(ins_locs["goal"])
+    assert len(ins_locs["start"]) <= agent_num
+    return ins_locs
+
+
 def get_map_name(map_file:str):
     """Get the map name from the map_file
 
