@@ -148,7 +148,7 @@ class MAPFRenderer:
             fin.readline()  # ignore type
             self.height = int(fin.readline().strip().split(' ')[1])
             self.width  = int(fin.readline().strip().split(' ')[1])
-            fin.readline()  # ingmore 'map' line
+            fin.readline()  # ignore 'map' line
             for line in fin.readlines():
                 out_line: List[bool] = []
                 for word in list(line.strip()):
@@ -160,6 +160,25 @@ class MAPFRenderer:
                 self.env_map.append(out_line)
         assert len(self.env_map) == self.height
 
+        obstacle_num = 0
+        degree_vertex_num = [0, 0, 0, 0, 0]
+        for h in range(self.height):
+            for w in range(self.width):
+                if not self.env_map[h][w]:
+                    obstacle_num += 1
+                    continue
+                cur_degree = 0
+                if (w - 1) >= 0 and self.env_map[h][w - 1]:
+                    cur_degree += 1
+                if (w + 1) <= (self.width - 1) and self.env_map[h][w + 1]:
+                    cur_degree += 1
+                if (h - 1) >= 0 and self.env_map[h - 1][w]:
+                    cur_degree += 1
+                if (h + 1) <= (self.height - 1) and self.env_map[h + 1][w]:
+                    cur_degree += 1
+                degree_vertex_num[cur_degree] += 1
+        print('obstacle num:', obstacle_num)
+        print('degree_vertex_num: ', degree_vertex_num)
 
     def load_agents(self, scen_file:str = None) -> None:
         """ load agents' locations from the scen_file
