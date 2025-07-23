@@ -11,11 +11,11 @@ from importlib.util import module_from_spec, spec_from_file_location
 from math import inf
 from typing import Dict
 
-import matplotlib.pyplot as plt
-from matplotlib.ticker import ScalarFormatter
 import numpy as np
 import util
 import yaml
+import matplotlib.pyplot as plt
+# from matplotlib.ticker import ScalarFormatter
 
 
 class MAPFPlotter:

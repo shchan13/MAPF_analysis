@@ -1,3 +1,5 @@
 .vscode
+.venv
+.conda
 local
 __pycache__
